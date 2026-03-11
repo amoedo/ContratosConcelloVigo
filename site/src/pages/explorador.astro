@@ -1,0 +1,9 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { ExplorerApp } from '@/components/explorer/ExplorerApp';
+---
+<BaseLayout title="Explorador | Contratos menores de Vigo" description="Exploraci&oacute;n libre con filtros, b&uacute;squeda textual y tabla exportable.">
+  <PageHero eyebrow="Explorador de datos" title="Filtra, busca y verifica cualquier se&ntilde;al en la tabla can&oacute;nica" copy="La URL act&uacute;a como contrato de filtros compartidos entre secciones para aterrizar cualquier gr&aacute;fico o hallazgo en las filas concretas." />
+  <ExplorerApp client:load />
+</BaseLayout>

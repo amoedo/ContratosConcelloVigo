@@ -1,0 +1,38 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { EChart } from '@/components/charts/EChart';
+import { RecordsTable } from '@/components/sections/RecordsTable';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_AMOUNTS_PAGE, type AmountsPageData } from '@/lib/types';
+
+const data = await loadDerivedJson<AmountsPageData>('amounts.json', EMPTY_AMOUNTS_PAGE);
+
+const bucketOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: data.buckets.map((item) => item.bucket) },
+  yAxis: { type: 'value' },
+  series: [{ type: 'bar', data: data.buckets.map((item) => item.count), itemStyle: { color: '#7c6a0a' } }],
+};
+---
+<BaseLayout title="Importes | Contratos menores de Vigo" description="Distribuci&oacute;n econ&oacute;mica, percentiles y contratos cercanos a umbral en Vigo.">
+  <PageHero eyebrow="An&aacute;lisis econ&oacute;mico" title="C&oacute;mo se distribuyen los importes y d&oacute;nde aparecen se&ntilde;ales de inter&eacute;s" copy="Percentiles, tramos, extremos y casos cercanos al umbral anal&iacute;tico configurado para seguir la pista del gasto menor." />
+
+  <section class="grid metrics section">
+    <article class="stat-card"><span>P10</span><strong>{data.summary.p10}</strong></article>
+    <article class="stat-card"><span>Mediana</span><strong>{data.summary.p50}</strong></article>
+    <article class="stat-card"><span>P90</span><strong>{data.summary.p90}</strong></article>
+    <article class="stat-card"><span>M&aacute;ximo</span><strong>{data.summary.max}</strong></article>
+  </section>
+
+  <section class="chart-card panel section">
+    <h3 class="card-title">Distribuci&oacute;n por tramos</h3>
+    <p class="card-subtitle">Reparto del n&uacute;mero de adjudicaciones entre los tramos de importe m&aacute;s &uacute;tiles para lectura p&uacute;blica.</p>
+    <EChart client:visible option={bucketOption} height={360} />
+  </section>
+
+  <section class="two-col section">
+    <RecordsTable rows={data.top_contracts} title="Contratos m&aacute;s altos" />
+    <RecordsTable rows={data.near_threshold_records} title="Casos cercanos al umbral" />
+  </section>
+</BaseLayout>

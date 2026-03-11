@@ -1,0 +1,58 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { EChart } from '@/components/charts/EChart';
+import { AlertList } from '@/components/sections/AlertList';
+import { RankingList } from '@/components/sections/RankingList';
+import { formatPercent } from '@/lib/format';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_VENDORS_PAGE, type VendorsPageData } from '@/lib/types';
+
+const data = await loadDerivedJson<VendorsPageData>('vendors.json', EMPTY_VENDORS_PAGE);
+
+const topAmountOption = {
+  tooltip: { trigger: 'axis' },
+  grid: { left: 20, right: 20, bottom: 20, containLabel: true },
+  xAxis: { type: 'value' },
+  yAxis: { type: 'category', data: data.ranking_by_amount.slice(0, 10).map((item) => item.name), inverse: true },
+  series: [{ type: 'bar', data: data.ranking_by_amount.slice(0, 10).map((item) => item.total_amount), itemStyle: { color: '#005f73' } }],
+};
+
+const newByYearOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: data.new_by_year.map((item) => item.year) },
+  yAxis: { type: 'value' },
+  series: [{ type: 'line', smooth: true, data: data.new_by_year.map((item) => item.count), itemStyle: { color: '#bb3e03' } }],
+};
+---
+<BaseLayout title="Adjudicatarios | Contratos menores de Vigo" description="Rankings, concentraci&oacute;n y fichas de adjudicatarios del Concello de Vigo.">
+  <PageHero eyebrow="An&aacute;lisis por adjudicatario" title="Qui&eacute;n gana m&aacute;s, qui&eacute;n aparece m&aacute;s y d&oacute;nde se concentra el gasto" copy="Esta secci&oacute;n resume la concentraci&oacute;n de proveedores, detecta perfiles recurrentes y permite saltar a fichas individuales con evoluci&oacute;n y competencia media." />
+
+  <section class="grid metrics section">
+    <article class="stat-card"><span>Top 1</span><strong>{formatPercent(data.concentration.top1_share * 100)}</strong></article>
+    <article class="stat-card"><span>Top 5</span><strong>{formatPercent(data.concentration.top5_share * 100)}</strong></article>
+    <article class="stat-card"><span>Top 10</span><strong>{formatPercent(data.concentration.top10_share * 100)}</strong></article>
+  </section>
+
+  <section class="two-col section">
+    <div class="chart-card panel">
+      <h3 class="card-title">Top 10 por importe</h3>
+      <p class="card-subtitle">Ranking base para localizar concentraci&oacute;n y adjudicatarios con mayor peso acumulado.</p>
+      <EChart client:visible option={topAmountOption} height={420} />
+    </div>
+    <div class="chart-card panel">
+      <h3 class="card-title">Adjudicatarios nuevos por a&ntilde;o</h3>
+      <p class="card-subtitle">Proveedores cuya primera aparici&oacute;n en la serie coincide con ese a&ntilde;o de dataset.</p>
+      <EChart client:visible option={newByYearOption} height={420} />
+    </div>
+  </section>
+
+  <section class="two-col section">
+    <RankingList items={data.ranking_by_amount.slice(0, 12)} hrefBase="/adjudicatarios" title="Ranking por importe" subtitle="Los adjudicatarios con m&aacute;s importe agregado en la serie completa." />
+    <RankingList items={data.ranking_by_count.slice(0, 12)} hrefBase="/adjudicatarios" title="Ranking por n&uacute;mero de adjudicaciones" subtitle="Los que aparecen m&aacute;s veces en los JSON anuales." />
+  </section>
+
+  <section class="section">
+    <AlertList alerts={data.highlights} title="Se&ntilde;ales relevantes en proveedores" />
+  </section>
+</BaseLayout>

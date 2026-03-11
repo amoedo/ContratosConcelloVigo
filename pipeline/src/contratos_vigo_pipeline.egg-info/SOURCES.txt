@@ -1,0 +1,14 @@
+pyproject.toml
+src/contratos_vigo/__init__.py
+src/contratos_vigo/__main__.py
+src/contratos_vigo/cli.py
+src/contratos_vigo/pipeline.py
+src/contratos_vigo/settings.py
+src/contratos_vigo/text.py
+src/contratos_vigo_pipeline.egg-info/PKG-INFO
+src/contratos_vigo_pipeline.egg-info/SOURCES.txt
+src/contratos_vigo_pipeline.egg-info/dependency_links.txt
+src/contratos_vigo_pipeline.egg-info/entry_points.txt
+src/contratos_vigo_pipeline.egg-info/requires.txt
+src/contratos_vigo_pipeline.egg-info/top_level.txt
+tests/test_pipeline_core.py

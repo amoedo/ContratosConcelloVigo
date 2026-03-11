@@ -1,0 +1,24 @@
+[
+  {
+    "tipo": "Servizo",
+    "data": "2026-02-05",
+    "expediente": "21948/77",
+    "asunto": "Contrato menor de servizos mensaxería e portes",
+    "unidade": "DESENVOLVEMENTO LOCAL E EMPREGO",
+    "num_licitadores": 0,
+    "adxudicatario": "ANEM ADVANCED LOGISTICS S.L.",
+    "importe": 208.12,
+    "fin_contrato": "2026-12-31"
+  },
+  {
+    "tipo": "Subministro",
+    "data": "2026-01-22",
+    "expediente": "20969/101",
+    "asunto": "Contrato privado de suscripcions faro de vigo para o ano 2026",
+    "unidade": "ALCALDÍA",
+    "num_licitadores": 1,
+    "adxudicatario": "FARO DE VIGO, S.A. UNIPERSONAL",
+    "importe": 16016.0,
+    "fin_contrato": "2026-12-31"
+  }
+]

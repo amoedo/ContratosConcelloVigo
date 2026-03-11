@@ -1,0 +1,19 @@
+{
+  "default": {
+    "servicio": 15000,
+    "suministro": 15000,
+    "obra": 40000,
+    "privado": 15000,
+    "otro": 15000
+  },
+  "overrides": {
+    "2019": {
+      "servicio": 15000,
+      "suministro": 15000,
+      "obra": 40000,
+      "privado": 15000,
+      "otro": 15000
+    }
+  },
+  "near_threshold_ratio": 0.85
+}

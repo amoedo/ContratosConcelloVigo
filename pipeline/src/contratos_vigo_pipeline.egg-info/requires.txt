@@ -1,0 +1,4 @@
+rapidfuzz>=3.9
+
+[dev]
+pytest>=8.0

@@ -1,0 +1,70 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { EChart } from '@/components/charts/EChart';
+import { KpiGrid } from '@/components/sections/KpiGrid';
+import { AlertList } from '@/components/sections/AlertList';
+import { RankingList } from '@/components/sections/RankingList';
+import { RecordsTable } from '@/components/sections/RecordsTable';
+import { withBase } from '@/lib/base';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_DASHBOARD, type DashboardData } from '@/lib/types';
+
+const dashboard = await loadDerivedJson<DashboardData>('dashboard.json', EMPTY_DASHBOARD);
+
+const monthlyOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: dashboard.series.monthly.map((item) => item.key) },
+  yAxis: [{ type: 'value', name: 'Adjudicaciones' }, { type: 'value', name: 'Importe', splitLine: { show: false } }],
+  series: [
+    { type: 'line', smooth: true, data: dashboard.series.monthly.map((item) => item.count), name: 'Adjudicaciones', itemStyle: { color: '#005f73' }, areaStyle: { color: 'rgba(0,95,115,0.15)' } },
+    { type: 'bar', yAxisIndex: 1, data: dashboard.series.monthly.map((item) => item.amount), name: 'Importe', itemStyle: { color: '#bb3e03' } },
+  ],
+};
+
+const typeOption = {
+  tooltip: { trigger: 'item' },
+  series: [
+    {
+      type: 'pie',
+      radius: ['45%', '72%'],
+      label: { formatter: '{b}: {d}%' },
+      data: dashboard.types.map((item) => ({ name: item.type, value: item.count })),
+    },
+  ],
+};
+---
+<BaseLayout title="Inicio | Contratos menores de Vigo" description="Cuadro de mando est&aacute;tico para entender qu&eacute; est&aacute; pasando con los contratos menores del Concello de Vigo.">
+  <PageHero eyebrow="Dashboard principal" title="Qu&eacute; est&aacute; pasando y d&oacute;nde conviene mirar primero" copy="Una lectura inicial en segundos: volumen, importe, concentraci&oacute;n, ritmo temporal y hallazgos destacados.">
+    <div class="ribbon-nav">
+      <a href={withBase('/adjudicatarios')}>Ir a adjudicatarios</a>
+      <a href={withBase('/unidades')}>Ver unidades</a>
+      <a href={withBase('/explorador')}>Abrir explorador</a>
+    </div>
+  </PageHero>
+
+  <KpiGrid summary={dashboard.summary} />
+
+  <section class="two-col section">
+    <div class="chart-card panel">
+      <h3 class="card-title">Pulso mensual</h3>
+      <p class="card-subtitle">Serie combinada de adjudicaciones publicadas e importe agregado por mes de adjudicaci&oacute;n.</p>
+      <EChart client:visible option={monthlyOption} height={360} />
+    </div>
+    <div class="chart-card panel">
+      <h3 class="card-title">Reparto por tipo</h3>
+      <p class="card-subtitle">Taxonom&iacute;a com&uacute;n consolidada desde el pipeline para comparar a&ntilde;os con esquemas de origen distintos.</p>
+      <EChart client:visible option={typeOption} height={360} />
+    </div>
+  </section>
+
+  <section class="two-col section">
+    <RankingList items={dashboard.top_vendors} hrefBase="/adjudicatarios" title="Top adjudicatarios" subtitle="Los que concentran m&aacute;s importe agregado en la foto global." />
+    <AlertList alerts={dashboard.alerts} />
+  </section>
+
+  <section class="two-col section">
+    <RankingList items={dashboard.top_units} hrefBase="/unidades" title="Top unidades" subtitle="Servicios y unidades con mayor peso presupuestario en contratos menores." />
+    <RecordsTable rows={dashboard.latest_records} title="&Uacute;ltimas adjudicaciones" />
+  </section>
+</BaseLayout>

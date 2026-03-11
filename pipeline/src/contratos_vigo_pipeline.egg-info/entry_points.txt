@@ -1,0 +1,2 @@
+[console_scripts]
+contratos-vigo = contratos_vigo.cli:main

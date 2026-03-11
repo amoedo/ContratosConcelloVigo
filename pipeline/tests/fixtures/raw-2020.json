@@ -1,0 +1,46 @@
+[
+  {
+    "tipo": "Servizo",
+    "data": "2020-01-08",
+    "expediente": "17816/101",
+    "asunto": "SERVIZO PUBLICIDADE INSTITUCIONAL ALCALDIA 2020",
+    "unidade": "ALCALDÍA",
+    "num_licitadores": 1,
+    "adxudicatario": "FARO DE VIGO SA UNIPERSONAL",
+    "importe": 18101.6,
+    "fin_contrato": "2020-12-31"
+  },
+  {
+    "tipo": "Servizo",
+    "data": "2020-01-21",
+    "expediente": "17833/101",
+    "asunto": "CAMPAÑA INSTITUCIONAL APAGADO DE LUCES EN PRENSA ESCRITA",
+    "unidade": "ALCALDÍA",
+    "num_licitadores": 1,
+    "adxudicatario": "FARO DE VIGO, S.A. UNIPERSONAL",
+    "importe": 7214.02,
+    "fin_contrato": "2020-12-31"
+  },
+  {
+    "tipo": "Servizo",
+    "data": "2020-01-28",
+    "expediente": "17843/101",
+    "asunto": "GASTOS SUBMINISTROS PRENSA",
+    "unidade": "ALCALDÍA",
+    "num_licitadores": 1,
+    "adxudicatario": "FARO DE VIGO, S.A. UNIPERSONAL",
+    "importe": 2616.0,
+    "fin_contrato": "2020-12-31"
+  },
+  {
+    "tipo": null,
+    "data": "2019-12-30",
+    "expediente": "710/1102",
+    "asunto": "subscrición Revista General de Derecho Administrativo",
+    "unidade": "SECRETARÍA GOBERNO LOCAL",
+    "num_licitadores": null,
+    "adxudicatario": "PORTAL DERECHO SA",
+    "importe": 109.51,
+    "fin_contrato": "2020-12-27"
+  }
+]

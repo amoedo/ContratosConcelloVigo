@@ -1,0 +1,62 @@
+[
+  {
+    "id": "publicidade-comunicacion",
+    "label": "Publicidade e comunicación",
+    "keywords": ["publicidade", "campana", "campaña", "prensa", "radio", "revista", "comunicacion", "comunicación", "carteleria", "cartelería", "difusion", "difusión", "bando", "promocion", "promoción"]
+  },
+  {
+    "id": "informatica-digital",
+    "label": "Informática e dixital",
+    "keywords": ["informatica", "informática", "software", "web", "hosting", "licenza", "licenza", "aplicativo", "servidor", "switch", "vdi", "drons", "drone", "rede", "equipamento informatico"]
+  },
+  {
+    "id": "formacion-emprego",
+    "label": "Formación e emprego",
+    "keywords": ["formacion", "formación", "curso", "obradoiro", "obradoiros", "emprego", "insercion", "inserción", "alumnado", "programa integrado"]
+  },
+  {
+    "id": "obras-mantemento",
+    "label": "Obras e mantemento",
+    "keywords": ["reparacion", "reparación", "mantemento", "mantenimiento", "obra", "obras", "poda", "canalon", "cuberta", "iluminacion", "alumbrado", "fontaneria", "electricidade"]
+  },
+  {
+    "id": "eventos-cultura",
+    "label": "Eventos e cultura",
+    "keywords": ["festival", "concerto", "concierto", "actuacion", "actuación", "cabalgata", "espectaculo", "espectáculo", "exposicion", "exposición", "revista festa", "gala"]
+  },
+  {
+    "id": "material-oficina",
+    "label": "Material de oficina",
+    "keywords": ["oficina", "papeleria", "papelería", "etiquetas", "bobinas", "sobremesa", "cadeiras", "cadeiras", "mobiliario"]
+  },
+  {
+    "id": "limpeza-prevencion",
+    "label": "Limpeza e prevención",
+    "keywords": ["limpeza", "limpieza", "covid", "epi", "epis", "xel", "hidroalcolico", "hixienizante", "mamparas", "proteccion", "protección", "lexionela"]
+  },
+  {
+    "id": "transportes-loxistica",
+    "label": "Transportes e loxística",
+    "keywords": ["mensaxeria", "mensajeria", "portes", "transporte", "viatxe", "viaxe", "desplazamento", "renting", "vehiculos", "vehículos"]
+  },
+  {
+    "id": "servizos-sociais-igualdade",
+    "label": "Servizos sociais e igualdade",
+    "keywords": ["violencia de xenero", "violencia de género", "apoio", "apoio psicoloxico", "apoio psicolóxico", "igualdade", "mulleres", "menores", "familia"]
+  },
+  {
+    "id": "deportes-seguridade",
+    "label": "Deportes e seguridade",
+    "keywords": ["deportes", "polideportivo", "bombeiros", "proteccion civil", "protección civil", "policia", "policía", "emerxencias", "desfibriladores", "uniformidade"]
+  },
+  {
+    "id": "medio-ambiente-vigonature",
+    "label": "Medio ambiente e VigoNature",
+    "keywords": ["vigonature", "vigozoo", "zoo", "residuos", "horta", "hortas", "xardins", "xardíns", "fauna", "ardores", "parque"]
+  },
+  {
+    "id": "turismo-promocion",
+    "label": "Turismo e promoción",
+    "keywords": ["turismo", "fitur", "visitas guiadas", "promocion turistica", "promoción turística", "nadal", "navidad"]
+  }
+]

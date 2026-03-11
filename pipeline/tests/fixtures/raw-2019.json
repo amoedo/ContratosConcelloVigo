@@ -1,0 +1,22 @@
+[
+  {
+    "tipo": "SERVIZOS",
+    "data": "2019-12-19",
+    "asunto": "CONTRATO MENOR DE SERVIZOS PARA INSERCIÓN PUBLICITARIA DA PROMOCIÓN TURISMO DE NADAL",
+    "unidade": "TURISMO",
+    "num_licitadores": 1,
+    "adxudicatario": "FARO DE VIGO, S.A.\nUNIPERSONAL",
+    "importe": 1500.0,
+    "fin_contrato": "2019-12-31"
+  },
+  {
+    "tipo": "SERVIZOS",
+    "data": "2019-10-07",
+    "asunto": "PROMOCIÓN DO TURISMO FUNERARIO A TRAVÉS DA CONTRATACIÓN DE RUTAS GUIADAS",
+    "unidade": "TURISMO",
+    "num_licitadores": 1,
+    "adxudicatario": "AGUIAS DE VIGO S.L.",
+    "importe": 16483.71,
+    "fin_contrato": "2019-12-31"
+  }
+]

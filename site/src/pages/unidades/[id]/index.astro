@@ -1,0 +1,68 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import PageHero from '@/components/layout/PageHero.astro';
+import { EChart } from '@/components/charts/EChart';
+import { AlertList } from '@/components/sections/AlertList';
+import { RecordsTable } from '@/components/sections/RecordsTable';
+import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { loadDerivedJson } from '@/lib/loadData';
+import { createEmptyEntityDetail, type EntityDetail, type EntityIndexItem } from '@/lib/types';
+
+export async function getStaticPaths() {
+  const items = await loadDerivedJson<EntityIndexItem[]>('entities/units/index.json', []);
+  return items.map((item) => ({ params: { id: item.id } }));
+}
+
+const id = Astro.params.id ?? '';
+const detail = await loadDerivedJson<EntityDetail>(`entities/units/${id}.json`, createEmptyEntityDetail(id, 'unit', 'Unidad sin datos'));
+
+const yearlyOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: detail.timeseries.yearly.map((item) => item.key) },
+  yAxis: [{ type: 'value' }, { type: 'value' }],
+  series: [
+    { type: 'bar', data: detail.timeseries.yearly.map((item) => item.amount), itemStyle: { color: '#005f73' } },
+    { type: 'line', yAxisIndex: 1, smooth: true, data: detail.timeseries.yearly.map((item) => item.count), itemStyle: { color: '#bb3e03' } },
+  ],
+};
+
+const counterpartyOption = {
+  tooltip: { trigger: 'axis' },
+  grid: { left: 20, right: 20, bottom: 20, containLabel: true },
+  xAxis: { type: 'value' },
+  yAxis: { type: 'category', data: detail.top_counterparties.slice(0, 10).map((item) => item.name), inverse: true },
+  series: [{ type: 'bar', data: detail.top_counterparties.slice(0, 10).map((item) => item.amount), itemStyle: { color: '#7c6a0a' } }],
+};
+---
+<BaseLayout title={`${detail.entity_name} | Unidades`} description={`Ficha de la unidad ${detail.entity_name}.`}>
+  <Breadcrumbs items={[{ label: 'Unidades', href: '/unidades' }, { label: detail.entity_name }]} />
+  <PageHero eyebrow="Ficha de unidad" title={detail.entity_name} copy="Visi&oacute;n de gasto, adjudicatarios dominantes, competencia media y se&ntilde;ales relacionadas con esta unidad municipal." />
+
+  <section class="grid metrics section">
+    <article class="stat-card"><span>Importe total</span><strong>{formatCurrency(detail.totals.total_amount)}</strong></article>
+    <article class="stat-card"><span>Adjudicaciones</span><strong>{formatNumber(detail.totals.contract_count)}</strong></article>
+    <article class="stat-card"><span>Adjudicatarios</span><strong>{formatNumber(detail.totals.unique_vendors)}</strong></article>
+    <article class="stat-card"><span>% un licitador</span><strong>{formatPercent(detail.competition.single_bidder_pct)}</strong></article>
+  </section>
+
+  <section class="two-col section">
+    <div class="chart-card panel">
+      <h3 class="card-title">Evoluci&oacute;n anual</h3>
+      <EChart client:visible option={yearlyOption} height={360} />
+    </div>
+    <div class="chart-card panel">
+      <h3 class="card-title">Adjudicatarios m&aacute;s frecuentes</h3>
+      <EChart client:visible option={counterpartyOption} height={360} />
+    </div>
+  </section>
+
+  <section class="two-col section">
+    <AlertList alerts={detail.pattern_clusters} title="Alertas vinculadas" />
+    <RecordsTable rows={detail.near_threshold_records} title="Casos cercanos al umbral" />
+  </section>
+
+  <section class="section">
+    <RecordsTable rows={detail.recent_records} title="Registros recientes" />
+  </section>
+</BaseLayout>

@@ -1,0 +1,62 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { EChart } from '@/components/charts/EChart';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_TIMELINE_PAGE, type TimelinePageData } from '@/lib/types';
+
+const data = await loadDerivedJson<TimelinePageData>('timeline.json', EMPTY_TIMELINE_PAGE);
+
+const monthlyOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: data.monthly.map((item) => item.key) },
+  yAxis: [{ type: 'value' }, { type: 'value' }],
+  series: [
+    { type: 'line', smooth: true, data: data.monthly.map((item) => item.count), itemStyle: { color: '#005f73' } },
+    { type: 'bar', yAxisIndex: 1, data: data.monthly.map((item) => item.amount), itemStyle: { color: '#bb3e03' } },
+  ],
+};
+
+const yearlyOption = {
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: data.yearly.map((item) => item.key) },
+  yAxis: { type: 'value' },
+  series: [{ type: 'bar', data: data.yearly.map((item) => item.amount), itemStyle: { color: '#7c6a0a' } }],
+};
+---
+<BaseLayout title="Evoluci&oacute;n temporal | Contratos menores de Vigo" description="Evoluci&oacute;n mensual y anual, anomal&iacute;as y comparaci&oacute;n temporal de contratos menores.">
+  <PageHero eyebrow="Evoluci&oacute;n temporal" title="Cambios de ritmo, picos y a&ntilde;os at&iacute;picos" copy="Lectura temporal para comparar ejercicios, detectar meses an&oacute;malos y situar hallazgos dentro de la serie completa." />
+
+  <section class="two-col section">
+    <div class="chart-card panel">
+      <h3 class="card-title">Serie mensual</h3>
+      <EChart client:visible option={monthlyOption} height={380} />
+    </div>
+    <div class="chart-card panel">
+      <h3 class="card-title">Comparativa anual</h3>
+      <EChart client:visible option={yearlyOption} height={380} />
+    </div>
+  </section>
+
+  <section class="table-card panel section">
+    <h3 class="card-title">Meses an&oacute;malos</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Adjudicaciones</th>
+          <th>Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.anomalies.map((item) => (
+          <tr>
+            <td>{item.key}</td>
+            <td>{item.count}</td>
+            <td>{item.amount}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</BaseLayout>

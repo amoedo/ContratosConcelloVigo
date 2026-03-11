@@ -1,0 +1,16 @@
+{
+  "name": "contratos-concello-vigo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pipeline y web estatica para analizar contratos menores del Concello de Vigo.",
+  "scripts": {
+    "dev": "npm --prefix site run dev",
+    "build": "npm --prefix site run build",
+    "preview": "npm --prefix site run preview",
+    "lint": "npm --prefix site run check",
+    "test:web": "npm --prefix site run test",
+    "test:e2e": "npm --prefix site run test:e2e",
+    "data:refresh": "node scripts/run-python.mjs -m contratos_vigo refresh --all",
+    "data:fixtures": "node scripts/run-python.mjs -m contratos_vigo build-fixtures"
+  }
+}

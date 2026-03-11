@@ -1,0 +1,23 @@
+﻿---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import PageHero from '@/components/layout/PageHero.astro';
+import { AlertList } from '@/components/sections/AlertList';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_PATTERNS_PAGE, type PatternsPageData } from '@/lib/types';
+
+const data = await loadDerivedJson<PatternsPageData>('patterns.json', EMPTY_PATTERNS_PAGE);
+---
+<BaseLayout title="Patrones y alertas | Contratos menores de Vigo" description="Detecci&oacute;n prudente de patrones repetidos, concentraci&oacute;n y se&ntilde;ales de revisi&oacute;n.">
+  <PageHero eyebrow="Patrones y alertas" title="Casos a revisar con lenguaje prudente y reglas expl&iacute;citas" copy="Esta secci&oacute;n no acusa: expone indicios, explica por qu&eacute; saltan y enlaza al explorador para comprobar cada caso en detalle." />
+
+  <section class="grid metrics section">
+    <article class="stat-card"><span>Alertas totales</span><strong>{data.alerts.length}</strong></article>
+    <article class="stat-card"><span>Fragmentaci&oacute;n</span><strong>{data.fragmentation.length}</strong></article>
+    <article class="stat-card"><span>Importes repetidos</span><strong>{data.repeated_amounts.length}</strong></article>
+    <article class="stat-card"><span>Cercanos a umbral</span><strong>{data.near_threshold_groups.length}</strong></article>
+  </section>
+
+  <section class="section">
+    <AlertList alerts={data.alerts} title="Alertas autom&aacute;ticas generadas" />
+  </section>
+</BaseLayout>

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import math
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
@@ -502,18 +502,31 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
             vendor_totals[row["vendor_id"]]["amount"] += row["importe_eur"]
             vendor_totals[row["vendor_id"]]["record_ids"].append(row["record_id"])
         ranked_vendors = sorted(vendor_totals.items(), key=lambda item: item[1]["amount"], reverse=True)
+        top_vendor_share = ranked_vendors[0][1]["amount"] / total_amount if ranked_vendors else 0.0
         top_three_share = sum(item[1]["amount"] for item in ranked_vendors[:3]) / total_amount
-        if len(ranked_vendors) >= 3 and total_amount >= 10000 and top_three_share >= 0.6:
+        concentration_summary = None
+        concentration_severity = "media"
+        concentration_record_ids: list[str] = []
+        if total_amount >= 10000 and len(rows) >= 3:
+            if len(ranked_vendors) >= 3 and top_three_share >= 0.6:
+                concentration_severity = "alta" if top_three_share >= 0.75 else "media"
+                concentration_summary = f"En {year}, {unit_name} concentró el {round(top_three_share * 100, 1)}% del importe en sus 3 principales adjudicatarios."
+                concentration_record_ids = [record_id for _, vendor in ranked_vendors[:3] for record_id in vendor["record_ids"][:5]]
+            elif top_vendor_share >= 0.9:
+                concentration_severity = "alta"
+                concentration_summary = f"En {year}, {unit_name} concentró el {round(top_vendor_share * 100, 1)}% del importe en un único adjudicatario."
+                concentration_record_ids = ranked_vendors[0][1]["record_ids"][:10]
+        if concentration_summary:
             register_alert(
                 {
                     "alert_id": f"unit-concentration-{year}-{unit_id}",
                     "kind": "unit-concentration",
-                    "severity": "alta" if top_three_share >= 0.75 else "media",
+                    "severity": concentration_severity,
                     "title": f"{unit_name} concentra el gasto en pocos adjudicatarios",
-                    "summary": f"En {year}, {unit_name} concentró el {round(top_three_share * 100, 1)}% del importe en sus 3 principales adjudicatarios.",
-                    "evidence": {"year": year, "unit_id": unit_id, "unit_name": unit_name, "top_three_share": round(top_three_share, 4), "total_amount": round(total_amount, 2)},
+                    "summary": concentration_summary,
+                    "evidence": {"year": year, "unit_id": unit_id, "unit_name": unit_name, "vendor_count": len(ranked_vendors), "top_vendor_share": round(top_vendor_share, 4), "top_three_share": round(top_three_share, 4), "total_amount": round(total_amount, 2)},
                     "filters": {"year": str(year), "unit": unit_id},
-                    "related_record_ids": [record_id for _, vendor in ranked_vendors[:3] for record_id in vendor["record_ids"][:5]],
+                    "related_record_ids": concentration_record_ids,
                 }
             )
 
@@ -916,7 +929,7 @@ def build_meta(rows: list[dict[str, Any]], alerts: list[dict[str, Any]], topic_c
     years = sorted({row["source_year"] for row in rows})
     return {
         "dataset": "contratos-menores-vigo",
-        "last_refreshed": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "last_refreshed": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "available_years": years,
         "partial_years": years[-1:] if years else [],
         "row_count": len(rows),

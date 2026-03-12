@@ -62,14 +62,9 @@ export function HeaderNav() {
           <p className="hero-copy">
             {'Navegaci\u00f3n editorial, m\u00e9tricas explicables y una capa de hallazgos prudentes para orientar la lectura sin perder el detalle de cada fila.'}
           </p>
-          <div className="badge-row">
-            <span className="badge">Dashboard instant\u00e1neo</span>
-            <span className="badge">Series y rankings</span>
-            <span className="badge">Explorador verificable</span>
-          </div>
         </div>
 
-        <aside className="masthead__aside">
+        {/* <aside className="masthead__aside">
           <div className="kicker">Mapa de lectura</div>
           <div className="signal-list">
             {SIGNALS.map((signal) => (
@@ -79,7 +74,7 @@ export function HeaderNav() {
               </article>
             ))}
           </div>
-        </aside>
+        </aside> */}
       </div>
 
       <nav className="ribbon-nav" aria-label={'Navegaci\u00f3n principal'}>

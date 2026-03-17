@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import math
+import time
+import urllib.error
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
@@ -297,6 +299,11 @@ def load_raw_datasets(settings: dict[str, Any], years: list[int] | None = None) 
 
 
 
+_DOWNLOAD_TIMEOUT = 60
+_DOWNLOAD_MAX_RETRIES = 3
+_DOWNLOAD_RETRY_DELAY = 5
+
+
 def download_year(year: int, settings: dict[str, Any], force: bool = False) -> Path:
     raw_dir: Path = settings["raw_dir"]
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -305,10 +312,17 @@ def download_year(year: int, settings: dict[str, Any], force: bool = False) -> P
     if output.exists() and not force:
         return output
     url = settings["source_url_template"].format(suffix=suffix)
-    with urlopen(url) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-    write_json(output, payload)
-    return output
+    for attempt in range(_DOWNLOAD_MAX_RETRIES):
+        try:
+            with urlopen(url, timeout=_DOWNLOAD_TIMEOUT) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            write_json(output, payload)
+            return output
+        except (urllib.error.URLError, OSError):
+            if attempt < _DOWNLOAD_MAX_RETRIES - 1:
+                time.sleep(_DOWNLOAD_RETRY_DELAY * (attempt + 1))
+            else:
+                raise
 
 
 

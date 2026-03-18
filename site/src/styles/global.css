@@ -462,6 +462,20 @@ a {
   letter-spacing: 0.09em;
 }
 
+.table-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
 .data-table tbody tr:nth-child(odd) {
   background: rgba(255, 255, 255, 0.38);
 }

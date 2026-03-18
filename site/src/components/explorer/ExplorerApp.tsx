@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 
@@ -46,12 +48,25 @@ function toCsv(rows: RecordExcerpt[]) {
     .join('\n');
 }
 
+function getAriaSort(value: false | 'asc' | 'desc') {
+  if (value === 'asc') return 'ascending';
+  if (value === 'desc') return 'descending';
+  return 'none';
+}
+
+function getSortIndicator(value: false | 'asc' | 'desc') {
+  if (value === 'asc') return '↑';
+  if (value === 'desc') return '↓';
+  return '↕';
+}
+
 export function ExplorerApp() {
   const [meta, setMeta] = useState<MetaData>(EMPTY_META);
   const [rows, setRows] = useState<RecordExcerpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(defaultFilters);
   const [pathname, setPathname] = useState(withBase('/explorador'));
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,10 +114,17 @@ export function ExplorerApp() {
     });
   }, [filters, rows]);
 
-  const table = useReactTable({ data: filteredRows, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: filteredRows,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   const exportCsv = () => {
-    const blob = new Blob([toCsv(filteredRows)], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob([toCsv(table.getRowModel().rows.map((row) => row.original))], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -141,8 +163,13 @@ export function ExplorerApp() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    <th key={header.id} aria-sort={getAriaSort(header.column.getIsSorted())}>
+                      {header.isPlaceholder ? null : (
+                        <button className="table-sort-button" type="button" onClick={header.column.getToggleSortingHandler()}>
+                          <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                          <span aria-hidden="true">{getSortIndicator(header.column.getIsSorted())}</span>
+                        </button>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -163,4 +190,3 @@ export function ExplorerApp() {
     </section>
   );
 }
-

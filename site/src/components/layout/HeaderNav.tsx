@@ -64,7 +64,7 @@ export function HeaderNav() {
           </p>
         </div>
 
-        {/* <aside className="masthead__aside">
+        <aside className="masthead__aside">
           <div className="kicker">Mapa de lectura</div>
           <div className="signal-list">
             {SIGNALS.map((signal) => (
@@ -74,7 +74,7 @@ export function HeaderNav() {
               </article>
             ))}
           </div>
-        </aside> */}
+        </aside>
       </div>
 
       <nav className="ribbon-nav" aria-label={'Navegaci\u00f3n principal'}>

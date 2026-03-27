@@ -1,11 +1,13 @@
 ﻿---
 import BaseLayout from '@/components/layout/BaseLayout.astro';
 import PageHero from '@/components/layout/PageHero.astro';
-import { AlertList } from '@/components/sections/AlertList';
+import { FilterableAlertList } from '@/components/sections/FilterableAlertList';
+import { sortAlertsByRecency } from '@/lib/alerts';
 import { loadDerivedJson } from '@/lib/loadData';
 import { EMPTY_PATTERNS_PAGE, type PatternsPageData } from '@/lib/types';
 
 const data = await loadDerivedJson<PatternsPageData>('patterns.json', EMPTY_PATTERNS_PAGE);
+const sortedAlerts = sortAlertsByRecency(data.alerts);
 ---
 <BaseLayout title="Patrones y alertas | Contratos menores de Vigo" description="Detecci&oacute;n prudente de patrones repetidos, concentraci&oacute;n y se&ntilde;ales de revisi&oacute;n.">
   <PageHero eyebrow="Patrones y alertas" title="Casos a revisar con lenguaje prudente y reglas expl&iacute;citas" copy="Esta secci&oacute;n no acusa: expone indicios, explica por qu&eacute; saltan y enlaza al explorador para comprobar cada caso en detalle." />
@@ -18,6 +20,6 @@ const data = await loadDerivedJson<PatternsPageData>('patterns.json', EMPTY_PATT
   </section>
 
   <section class="section">
-    <AlertList alerts={data.alerts} title="Alertas autom&aacute;ticas generadas" />
+    <FilterableAlertList client:load alerts={sortedAlerts} title="Alertas autom&aacute;ticas generadas" />
   </section>
 </BaseLayout>

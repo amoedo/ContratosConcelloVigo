@@ -422,6 +422,70 @@ a {
   border-color: rgba(0, 95, 115, 0.4);
 }
 
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(23, 33, 38, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.mobile-menu-toggle:hover {
+  border-color: rgba(0, 95, 115, 0.32);
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(23, 33, 38, 0.08);
+}
+
+.mobile-menu-toggle__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-menu-toggle__icon svg {
+  display: block;
+}
+
+/* Desktop navigation - show by default */
+.ribbon-nav--desktop {
+  display: flex;
+}
+
+/* Mobile navigation - hidden by default */
+.ribbon-nav--mobile {
+  display: none;
+}
+
+/* Navigation groups for mobile */
+.nav-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.nav-group__label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  padding: 0.5rem 0.25rem 0.25rem;
+}
+
+.nav-group__items {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .filter-panel {
   margin-top: 1rem;
   padding: 1.15rem;
@@ -718,6 +782,40 @@ a {
   .site-footer__top {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* Mobile navigation changes */
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .ribbon-nav--desktop {
+    display: none;
+  }
+
+  .ribbon-nav--mobile {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(23, 33, 38, 0.08);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 300ms ease, opacity 300ms ease, padding 300ms ease;
+  }
+
+  .ribbon-nav--mobile.is-open {
+    max-height: 600px;
+    opacity: 1;
+    margin-bottom: 1rem;
+  }
+
+  .ribbon-nav--mobile a {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .ribbon-nav {

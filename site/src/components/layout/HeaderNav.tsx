@@ -1,7 +1,8 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { withBase } from '@/lib/base';
 
+// Navigation items with logical grouping for better clarity
 const NAV_ITEMS = [
   ['/', 'Inicio'],
   ['/adjudicatarios', 'Adjudicatarios'],
@@ -10,29 +11,59 @@ const NAV_ITEMS = [
   ['/importes', 'Importes'],
   ['/patrones', 'Patrones'],
   ['/temas', 'Temas'],
-  ['/evolucion', 'Evoluci\u00f3n'],
+  ['/evolucion', 'Evolución'],
   ['/explorador', 'Explorador'],
-  ['/metodologia', 'Metodolog\u00eda'],
+  ['/metodologia', 'Metodología'],
 ] as const;
+
+// Navigation groups for mobile organized menu
+const NAV_GROUPS = [
+  {
+    label: 'Análisis',
+    items: [
+      ['/', 'Inicio'],
+      ['/adjudicatarios', 'Adjudicatarios'],
+      ['/unidades', 'Unidades'],
+      ['/competencia', 'Competencia'],
+      ['/importes', 'Importes'],
+    ],
+  },
+  {
+    label: 'Patrones',
+    items: [
+      ['/patrones', 'Patrones'],
+      ['/temas', 'Temas'],
+      ['/evolucion', 'Evolución'],
+    ],
+  },
+  {
+    label: 'Datos',
+    items: [
+      ['/explorador', 'Explorador'],
+      ['/metodologia', 'Metodología'],
+    ],
+  },
+];
 
 const SIGNALS = [
   {
-    title: 'Qu\u00e9 mirar primero',
-    copy: 'Volumen, importe, concentraci\u00f3n, competencia y patrones en un solo recorrido.',
+    title: 'Qué mirar primero',
+    copy: 'Volumen, importe, concentración, competencia y patrones en un solo recorrido.',
   },
   {
-    title: 'C\u00f3mo se usa',
-    copy: 'Los filtros viajan en la URL para conectar gr\u00e1ficos, fichas y explorador.',
+    title: 'Cómo se usa',
+    copy: 'Los filtros viajan en la URL para conectar gráficos, fichas y explorador.',
   },
   {
-    title: 'C\u00f3mo se publica',
-    copy: 'Todo se sirve como est\u00e1tico; el pipeline deja el trabajo pesado hecho antes del despliegue.',
+    title: 'Cómo se publica',
+    copy: 'Todo se sirve como estático; el pipeline deja el trabajo pesado hecho antes del despliegue.',
   },
 ] as const;
 
 export function HeaderNav() {
   const [pathname, setPathname] = useState(withBase('/'));
   const [search, setSearch] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const sync = () => {
@@ -44,23 +75,53 @@ export function HeaderNav() {
     return () => window.removeEventListener('popstate', sync);
   }, []);
 
+  // Improved active state detection that handles nested routes
+  const isActive = (href: string) => {
+    const fullHref = withBase(href);
+    if (pathname === fullHref || pathname === `${fullHref}/`) {
+      return true;
+    }
+    // For non-home routes, check if current path starts with the route
+    if (href !== '/' && pathname.startsWith(fullHref)) {
+      return true;
+    }
+    return false;
+  };
+
   const links = useMemo(
-    () => NAV_ITEMS.map(([href, label]) => {
-      const fullHref = withBase(href);
-      return { href: `${fullHref}${search}`, label, active: pathname === fullHref || pathname === `${fullHref}/` };
-    }),
+    () =>
+      NAV_ITEMS.map(([href, label]) => {
+        const fullHref = withBase(href);
+        return { href: `${fullHref}${search}`, label, active: isActive(href) };
+      }),
     [pathname, search],
   );
+
+  const navGroups = useMemo(
+    () =>
+      NAV_GROUPS.map((group) => ({
+        label: group.label,
+        items: group.items.map(([href, label]) => {
+          const fullHref = withBase(href);
+          return { href: `${fullHref}${search}`, label, active: isActive(href) };
+        }),
+      })),
+    [pathname, search],
+  );
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
 
   return (
     <header className="masthead panel">
       <div className="masthead__grid">
         <div className="masthead__content">
           <div className="hero-eyebrow">{`Contratos menores / Concello de Vigo`}</div>
-          <p className="masthead__eyeline">{`An\u00e1lisis c\u00edvico para ver qu\u00e9 se contrata, con qui\u00e9n y c\u00f3mo cambia con el tiempo.`}</p>
-          <h1 className="hero-title">{'Radar p\u00fablico para leer qu\u00e9 se contrata, con qui\u00e9n y c\u00f3mo evoluciona.'}</h1>
+          <p className="masthead__eyeline">{`Análisis cívico para ver qué se contrata, con quién y cómo cambia con el tiempo.`}</p>
+          <h1 className="hero-title">{'Radar público para leer qué se contrata, con quién y cómo evoluciona.'}</h1>
           <p className="hero-copy">
-            {'Navegaci\u00f3n editorial, m\u00e9tricas explicables y una capa de hallazgos prudentes para orientar la lectura sin perder el detalle de cada fila.'}
+            {'Navegación editorial, métricas explicables y una capa de hallazgos prudentes para orientar la lectura sin perder el detalle de cada fila.'}
           </p>
         </div>
 
@@ -77,11 +138,52 @@ export function HeaderNav() {
         </aside>
       </div>
 
-      <nav className="ribbon-nav" aria-label={'Navegaci\u00f3n principal'}>
+      {/* Mobile menu toggle button */}
+      <button
+        className="mobile-menu-toggle"
+        onClick={toggleMobileMenu}
+        aria-label="Abrir menú de navegación"
+        aria-expanded={mobileMenuOpen}
+      >
+        <span className="mobile-menu-toggle__icon">
+          {mobileMenuOpen ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </span>
+        <span className="mobile-menu-toggle__label">Menú</span>
+      </button>
+
+      {/* Desktop navigation - flat list */}
+      <nav className="ribbon-nav ribbon-nav--desktop" aria-label={'Navegación principal'}>
         {links.map((link) => (
           <a key={link.href} href={link.href} className={link.active ? 'is-active' : undefined}>
             {link.label}
           </a>
+        ))}
+      </nav>
+
+      {/* Mobile navigation - grouped with sections */}
+      <nav className={`ribbon-nav ribbon-nav--mobile ${mobileMenuOpen ? 'is-open' : ''}`} aria-label={'Navegación principal'}>
+        {navGroups.map((group) => (
+          <div key={group.label} className="nav-group">
+            <div className="nav-group__label">{group.label}</div>
+            <div className="nav-group__items">
+              {group.items.map((link) => (
+                <a key={link.href} href={link.href} className={link.active ? 'is-active' : undefined} onClick={() => setMobileMenuOpen(false)}>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
     </header>

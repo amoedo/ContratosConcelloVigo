@@ -495,7 +495,21 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     alerts: list[dict[str, Any]] = []
     by_record = {record["record_id"]: record for record in records}
 
+    def alert_sort_date(alert: dict[str, Any]) -> str | None:
+        related_rows = [by_record[record_id] for record_id in alert["related_record_ids"] if record_id in by_record]
+        related_dates = [parse_date(row["award_date"]) for row in related_rows if row.get("award_date")]
+        if related_dates:
+            return max(related_dates).isoformat()
+        related_years = [row["source_year"] for row in related_rows if row.get("source_year") is not None]
+        if related_years:
+            return f"{max(related_years)}-12-31"
+        year = alert.get("filters", {}).get("year")
+        if year:
+            return f"{year}-12-31"
+        return None
+
     def register_alert(alert: dict[str, Any]) -> None:
+        alert["sort_date"] = alert_sort_date(alert)
         alerts.append(alert)
         for record_id in alert["related_record_ids"]:
             if record_id in by_record and alert["kind"] not in by_record[record_id]["alert_flags"]:
@@ -1123,4 +1137,3 @@ def build_from_fixture_directory(fixture_dir: Path, settings: dict[str, Any] | N
         year = int(path.stem.split("-")[-1])
         raw_by_year[year] = read_json(path, default=[])
     return build_from_raw(raw_by_year, resolved_settings)
-

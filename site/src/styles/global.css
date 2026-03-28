@@ -818,12 +818,6 @@ a {
     justify-content: flex-start;
   }
 
-  .ribbon-nav {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
   .ribbon-nav a,
   .pill-link {
     width: 100%;

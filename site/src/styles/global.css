@@ -204,6 +204,7 @@ a {
   gap: 1.25rem;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
   align-items: start;
+  margin-top: 1.5rem;
 }
 
 .masthead__content {
@@ -352,6 +353,55 @@ a {
 .card-subtitle {
   max-width: 62ch;
   margin-bottom: 1rem;
+}
+
+/* Collapsible section styles */
+.collapsible-section {
+  overflow: hidden;
+}
+
+.collapsible-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 160ms ease;
+}
+
+.collapsible-section__header:hover {
+  opacity: 0.7;
+}
+
+.collapsible-section__header .card-title {
+  margin: 0;
+}
+
+.collapsible-section__icon {
+  flex-shrink: 0;
+  color: var(--accent);
+  transition: transform 220ms ease;
+}
+
+.collapsible-section__icon.is-open {
+  transform: rotate(180deg);
+}
+
+.collapsible-section__content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 300ms ease, opacity 300ms ease;
+}
+
+.collapsible-section__content.is-open {
+  max-height: 1000px;
+  opacity: 1;
 }
 
 .two-col {

@@ -115,30 +115,7 @@ export function HeaderNav() {
 
   return (
     <header className="masthead panel">
-      <div className="masthead__grid">
-        <div className="masthead__content">
-          <div className="hero-eyebrow">{`Contratos menores / Concello de Vigo`}</div>
-          <p className="masthead__eyeline">{`Análisis cívico para ver qué se contrata, con quién y cómo cambia con el tiempo.`}</p>
-          <h1 className="hero-title">{'Radar público para leer qué se contrata, con quién y cómo evoluciona.'}</h1>
-          <p className="hero-copy">
-            {'Navegación editorial, métricas explicables y una capa de hallazgos prudentes para orientar la lectura sin perder el detalle de cada fila.'}
-          </p>
-        </div>
-
-        <aside className="masthead__aside">
-          <div className="kicker">Mapa de lectura</div>
-          <div className="signal-list">
-            {SIGNALS.map((signal) => (
-              <article className="signal-card" key={signal.title}>
-                <strong>{signal.title}</strong>
-                <p>{signal.copy}</p>
-              </article>
-            ))}
-          </div>
-        </aside>
-      </div>
-
-      {/* Mobile menu toggle button */}
+      {/* Navigation at the top - Mobile menu toggle button */}
       <button
         className="mobile-menu-toggle"
         onClick={toggleMobileMenu}
@@ -162,7 +139,7 @@ export function HeaderNav() {
         <span className="mobile-menu-toggle__label">Menú</span>
       </button>
 
-      {/* Desktop navigation - flat list */}
+      {/* Desktop navigation - flat list at the top */}
       <nav className="ribbon-nav ribbon-nav--desktop" aria-label={'Navegación principal'}>
         {links.map((link) => (
           <a key={link.href} href={link.href} className={link.active ? 'is-active' : undefined}>
@@ -186,6 +163,30 @@ export function HeaderNav() {
           </div>
         ))}
       </nav>
+
+      {/* Hero content below navigation */}
+      <div className="masthead__grid">
+        <div className="masthead__content">
+          <div className="hero-eyebrow">Contratos menores / Concello de Vigo</div>
+          <p className="masthead__eyeline">Análisis cívico de contratos: qué se contrata, con quién y cómo evoluciona.</p>
+          <h1 className="hero-title">Radar público de contratación del Concello de Vigo</h1>
+          <p className="hero-copy">
+            Navegación sencilla, métricas claras y hallazgos para orientar la lectura sin perder detalle.
+          </p>
+        </div>
+
+        <aside className="masthead__aside">
+          <div className="kicker">Mapa de lectura</div>
+          <div className="signal-list">
+            {SIGNALS.map((signal) => (
+              <article className="signal-card" key={signal.title}>
+                <strong>{signal.title}</strong>
+                <p>{signal.copy}</p>
+              </article>
+            ))}
+          </div>
+        </aside>
+      </div>
     </header>
   );
 }

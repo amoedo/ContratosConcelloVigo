@@ -506,9 +506,10 @@ a {
   display: block;
 }
 
-/* Desktop navigation - show by default */
+/* Desktop navigation - show by default with grouped layout */
 .ribbon-nav--desktop {
   display: flex;
+  gap: 2rem;
 }
 
 /* Mobile navigation - hidden by default */
@@ -516,7 +517,7 @@ a {
   display: none;
 }
 
-/* Navigation groups for mobile */
+/* Navigation groups for both desktop and mobile */
 .nav-group {
   display: grid;
   gap: 0.5rem;
@@ -532,7 +533,8 @@ a {
 }
 
 .nav-group__items {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -855,6 +857,11 @@ a {
     overflow: hidden;
     opacity: 0;
     transition: max-height 300ms ease, opacity 300ms ease, padding 300ms ease;
+  }
+
+  .ribbon-nav--mobile .nav-group__items {
+    display: grid;
+    gap: 0.5rem;
   }
 
   .ribbon-nav--mobile.is-open {

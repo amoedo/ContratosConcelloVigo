@@ -2,21 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { withBase } from '@/lib/base';
 
-// Navigation items with logical grouping for better clarity
-const NAV_ITEMS = [
-  ['/', 'Inicio'],
-  ['/adjudicatarios', 'Adjudicatarios'],
-  ['/unidades', 'Unidades'],
-  ['/competencia', 'Competencia'],
-  ['/importes', 'Importes'],
-  ['/patrones', 'Patrones'],
-  ['/temas', 'Temas'],
-  ['/evolucion', 'Evolución'],
-  ['/explorador', 'Explorador'],
-  ['/metodologia', 'Metodología'],
-] as const;
-
-// Navigation groups for mobile organized menu
+// Navigation groups for organized menu (used for both desktop and mobile)
 const NAV_GROUPS = [
   {
     label: 'Análisis',
@@ -88,15 +74,6 @@ export function HeaderNav() {
     return false;
   };
 
-  const links = useMemo(
-    () =>
-      NAV_ITEMS.map(([href, label]) => {
-        const fullHref = withBase(href);
-        return { href: `${fullHref}${search}`, label, active: isActive(href) };
-      }),
-    [pathname, search],
-  );
-
   const navGroups = useMemo(
     () =>
       NAV_GROUPS.map((group) => ({
@@ -139,12 +116,19 @@ export function HeaderNav() {
         <span className="mobile-menu-toggle__label">Menú</span>
       </button>
 
-      {/* Desktop navigation - flat list at the top */}
+      {/* Desktop navigation - grouped sections */}
       <nav className="ribbon-nav ribbon-nav--desktop" aria-label={'Navegación principal'}>
-        {links.map((link) => (
-          <a key={link.href} href={link.href} className={link.active ? 'is-active' : undefined}>
-            {link.label}
-          </a>
+        {navGroups.map((group) => (
+          <div key={group.label} className="nav-group">
+            <div className="nav-group__label">{group.label}</div>
+            <div className="nav-group__items">
+              {group.items.map((link) => (
+                <a key={link.href} href={link.href} className={link.active ? 'is-active' : undefined}>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 

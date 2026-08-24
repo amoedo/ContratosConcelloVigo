@@ -1,38 +1,17 @@
-﻿import React from 'react';
 import { withBase } from '@/lib/base';
+import { useLanguage, withLanguage } from '@/lib/i18n';
+import { localizedAlertSummary, ruleName, severityLabel } from '@/lib/rules';
 import type { AlertItem } from '@/lib/types';
 
-interface Props {
-  alerts: AlertItem[];
-  title?: string;
-}
+interface Props { alerts: AlertItem[]; title?: string; titleGl?: string }
 
-export function AlertList({ alerts, title = 'Hallazgos autom\u00e1ticos' }: Props) {
-  return (
-    <div className="list-card panel">
-      <h3 className="card-title">{title}</h3>
-      {!alerts.length ? (
-        <div className="empty-state">
-          <strong>{'Sin hallazgos todav\u00eda'}</strong>
-          <p>{'Cuando el pipeline detecte concentraci\u00f3n, baja competencia o patrones repetidos, aparecer\u00e1n aqu\u00ed con enlace directo al explorador.'}</p>
-        </div>
-      ) : (
-        <ul className="list-reset">
-          {alerts.map((alert) => (
-            <li className="alert-item" data-severity={alert.severity} key={alert.alert_id}>
-              <div className="badge-row">
-                <span className="badge">{alert.severity}</span>
-                <span className="badge">{alert.kind}</span>
-              </div>
-              <strong>{alert.title}</strong>
-              <p>{alert.summary}</p>
-              <a className="inline-link" href={`${withBase('/explorador')}?${new URLSearchParams(alert.filters).toString()}`}>
-                Ver casos relacionados
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+export function AlertList({ alerts, title = 'Hallazgos automáticos', titleGl = 'Achados automáticos' }: Props) {
+  const language = useLanguage();
+  const copy = language === 'gl'
+    ? { title: titleGl, empty: 'Aínda non hai achados', body: 'Cando o pipeline detecte sinais, aparecerán aquí cunha ligazón directa ao explorador.', view: 'Ver casos relacionados' }
+    : { title, empty: 'Sin hallazgos todavía', body: 'Cuando el pipeline detecte señales, aparecerán aquí con enlace directo al explorador.', view: 'Ver casos relacionados' };
+  return <div className="list-card panel">
+    <h3 className="card-title">{copy.title}</h3>
+    {!alerts.length ? <div className="empty-state"><strong>{copy.empty}</strong><p>{copy.body}</p></div> : <ul className="list-reset">{alerts.map((alert) => <li className="alert-item" data-severity={alert.severity} key={alert.alert_id}><div className="badge-row"><span className="badge">{severityLabel(alert.severity, language)}</span><span className="badge">{ruleName(alert.kind, language)}</span></div><strong>{ruleName(alert.kind, language)}</strong><p>{localizedAlertSummary(alert, language)}</p><a className="inline-link" href={withLanguage(`${withBase('/explorador')}?${new URLSearchParams(alert.filters)}`, language)}>{copy.view}</a></li>)}</ul>}
+  </div>;
 }

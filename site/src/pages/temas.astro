@@ -1,46 +1,13 @@
-﻿---
+---
 import BaseLayout from '@/components/layout/BaseLayout.astro';
 import PageHero from '@/components/layout/PageHero.astro';
-import { EChart } from '@/components/charts/EChart';
+import { YearlyAnalysis } from '@/components/sections/YearlyAnalysis';
 import { loadDerivedJson } from '@/lib/loadData';
-import { EMPTY_TOPICS_PAGE, type TopicsPageData } from '@/lib/types';
-
+import { EMPTY_META, EMPTY_TOPICS_PAGE, type MetaData, type TopicsPageData } from '@/lib/types';
 const data = await loadDerivedJson<TopicsPageData>('topics.json', EMPTY_TOPICS_PAGE);
-
-const rankingOption = {
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'value' },
-  yAxis: { type: 'category', data: data.ranking.slice(0, 10).map((item) => item.label), inverse: true },
-  series: [{ type: 'bar', data: data.ranking.slice(0, 10).map((item) => item.total_amount), itemStyle: { color: '#005f73' } }],
-};
+const meta = await loadDerivedJson<MetaData>('meta.json', EMPTY_META);
 ---
-<BaseLayout title="Temas | Contratos menores de Vigo" description="Taxonom&iacute;a autom&aacute;tica, t&eacute;rminos frecuentes y lectura tem&aacute;tica de los asuntos.">
-  <PageHero eyebrow="Temas y asuntos" title="Qu&eacute; necesidades aparecen de forma recurrente en los asuntos" copy="Clasificaci&oacute;n tem&aacute;tica ligera, t&eacute;rminos dominantes y clusters de asuntos para pasar del dato bruto a una lectura tem&aacute;tica comprensible." />
-
-  <section class="two-col section">
-    <div class="chart-card panel">
-      <h3 class="card-title">Temas con m&aacute;s importe</h3>
-      <p class="card-subtitle">Taxonom&iacute;a h&iacute;brida por reglas y t&eacute;rminos significativos del asunto.</p>
-      <EChart client:visible option={rankingOption} height={420} />
-    </div>
-    <div class="list-card panel">
-      <h3 class="card-title">T&eacute;rminos frecuentes</h3>
-      <p class="card-subtitle">Se&ntilde;ales l&eacute;xicas generadas por el pipeline sobre asuntos limpios y tokenizados.</p>
-      <div class="badge-row">
-        {data.top_terms.map((item) => <span class="badge">{item.term}</span>)}
-      </div>
-    </div>
-  </section>
-
-  <section class="list-card panel section">
-    <h3 class="card-title">Clusters recurrentes</h3>
-    <ul class="list-reset">
-      {data.clusters.map((cluster) => (
-        <li class="rank-item">
-          <strong>{cluster.label}</strong>
-          <p>{cluster.count} asuntos agrupados</p>
-        </li>
-      ))}
-    </ul>
-  </section>
+<BaseLayout title="Temas | Contratos de Vigo" titleGl="Temas | Contratos de Vigo" description="Temas recurrentes en los asuntos de los contratos menores de Vigo." descriptionGl="Temas recorrentes nos asuntos dos contratos menores de Vigo.">
+  <PageHero eyebrow="Temas y asuntos" eyebrowGl="Temas e asuntos" title="Qué necesidades aparecen de forma recurrente" titleGl="Que necesidades aparecen de forma recorrente" copy="Una taxonomía explicable ayuda a pasar del texto libre a categorías comparables y enlazadas con sus registros." copyGl="Unha taxonomía explicable axuda a pasar do texto libre a categorías comparables e ligadas cos seus rexistros." />
+  <YearlyAnalysis client:load section="topics" initial={data} meta={meta} />
 </BaseLayout>

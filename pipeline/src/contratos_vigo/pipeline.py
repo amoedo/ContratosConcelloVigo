@@ -63,6 +63,7 @@ SUFFIX_SEQUENCES = [
     ("U", "T", "E"),
     ("UTE",),
 ]
+TRUNCATED_VENDOR_TOKENS = {"SERVIC", "SUMINIST", "CONSTRUCC", "COMUNICAC", "INSTALAC", "MANTENIM"}
 
 
 def similarity(left: str, right: str) -> float:
@@ -248,6 +249,17 @@ def resolve_entities(
             "name": group["name"],
             "base_key": group["base_key"],
         }
+
+        if kind == "vendor" and normalize_ascii_key(raw_label).split()[-1:] and normalize_ascii_key(raw_label).split()[-1] in TRUNCATED_VENDOR_TOKENS:
+            reviews.append(
+                {
+                    "entity": kind,
+                    "raw_label": raw_label,
+                    "suggested_name": group["name"],
+                    "status": "possible-source-truncation",
+                    "reason": "El nombre parece terminar en una palabra truncada por el sistema de origen.",
+                }
+            )
 
     return resolved, reviews
 
@@ -507,7 +519,7 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         concentration_summary = None
         concentration_severity = "media"
         concentration_record_ids: list[str] = []
-        if total_amount >= 10000 and len(rows) >= 3:
+        if total_amount >= 10000 and len(rows) >= 10:
             if len(ranked_vendors) >= 3 and top_three_share >= 0.6:
                 concentration_severity = "alta" if top_three_share >= 0.75 else "media"
                 concentration_summary = f"En {year}, {unit_name} concentró el {round(top_three_share * 100, 1)}% del importe en sus 3 principales adjudicatarios."
@@ -524,7 +536,7 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "severity": concentration_severity,
                     "title": f"{unit_name} concentra el gasto en pocos adjudicatarios",
                     "summary": concentration_summary,
-                    "evidence": {"year": year, "unit_id": unit_id, "unit_name": unit_name, "vendor_count": len(ranked_vendors), "top_vendor_share": round(top_vendor_share, 4), "top_three_share": round(top_three_share, 4), "total_amount": round(total_amount, 2)},
+                    "evidence": {"year": year, "unit_id": unit_id, "unit_name": unit_name, "record_count": len(rows), "vendor_count": len(ranked_vendors), "top_vendor_share": round(top_vendor_share, 4), "top_three_share": round(top_three_share, 4), "total_amount": round(total_amount, 2)},
                     "filters": {"year": str(year), "unit": unit_id},
                     "related_record_ids": concentration_record_ids,
                 }
@@ -573,6 +585,8 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         years = sorted(yearly_totals)
         vendor_name = vendor_rows[vendor_id][years[-1]][0]["vendor_name"]
         for previous_year, year in zip(years, years[1:]):
+            if year != previous_year + 1:
+                continue
             previous_amount = yearly_totals[previous_year]
             current_amount = yearly_totals[year]
             if previous_amount >= 1000 and current_amount >= previous_amount * 2.5 and current_amount >= 5000:
@@ -598,6 +612,8 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for topic_id, yearly_totals in topic_year_totals.items():
         years = sorted(yearly_totals)
         for previous_year, year in zip(years, years[1:]):
+            if year != previous_year + 1:
+                continue
             previous_amount = yearly_totals[previous_year]
             current_amount = yearly_totals[year]
             if previous_amount >= 1000 and current_amount >= previous_amount * 2.4 and current_amount >= 5000:
@@ -677,7 +693,66 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 }
             )
 
-    alerts.sort(key=lambda alert: (-SEVERITY_ORDER.get(alert["severity"], 0), alert["alert_id"]))
+    rule_parameters = {
+        "unit-concentration": {"minimum_records": 10, "minimum_total_eur": 10000, "top_vendor_share": 0.9, "top_three_share": 0.6},
+        "low-competition": {"minimum_known_records": 5, "single_bidder_share": 0.75},
+        "near-threshold-group": {"minimum_records": 3, "threshold_ratio": 0.85},
+        "vendor-growth": {"growth_multiple": 2.5, "minimum_current_eur": 5000},
+        "topic-growth": {"growth_multiple": 2.4, "minimum_current_eur": 5000},
+        "fragmentation-pattern": {"minimum_records": 3, "window_days": 60},
+        "repeated-amounts": {"minimum_records": 3, "rounding_eur": 50},
+    }
+    priority_by_severity = {"alta": 3, "media": 2, "baixa": 1}
+    confidence_by_kind = {
+        "fragmentation-pattern": 0.78,
+        "unit-concentration": 0.9,
+        "low-competition": 0.86,
+        "near-threshold-group": 0.92,
+        "repeated-amounts": 0.72,
+        "vendor-growth": 0.82,
+        "topic-growth": 0.76,
+    }
+    for alert in alerts:
+        filters = alert.get("filters", {})
+        family_parts = [
+            alert["kind"],
+            filters.get("unit", ""),
+            filters.get("vendor", ""),
+            filters.get("topic", ""),
+        ]
+        alert["family_id"] = f"{alert['kind']}-{stable_hash(*family_parts, length=10)}"
+        alert["confidence"] = confidence_by_kind.get(alert["kind"], 0.7)
+        alert["priority"] = priority_by_severity.get(alert["severity"], 1)
+        alert["rule_version"] = "2.0"
+        alert["rule_parameters"] = rule_parameters.get(alert["kind"], {})
+        alert["affected_count"] = len(alert.get("related_record_ids", []))
+        alert["known_data_denominator"] = alert.get("evidence", {}).get("known_contracts")
+        alert["evidence_totals"] = {
+            key: value
+            for key, value in alert.get("evidence", {}).items()
+            if key in {"total_amount", "previous_amount", "current_amount", "records", "window_days"}
+        }
+
+        related_dates = sorted(
+            record["award_date"]
+            for record_id in alert.get("related_record_ids", [])
+            if (record := by_record.get(record_id)) and record.get("award_date")
+        )
+        evidence_years = [
+            int(value)
+            for key in ("previous_year", "year")
+            if (value := alert.get("evidence", {}).get(key)) is not None
+        ]
+        alert["observed_from"] = related_dates[0] if related_dates else (f"{min(evidence_years)}-01-01" if evidence_years else None)
+        alert["observed_to"] = related_dates[-1] if related_dates else (f"{max(evidence_years)}-12-31" if evidence_years else None)
+        is_partial = alert["kind"] in {"vendor-growth", "topic-growth"} and alert.get("evidence", {}).get("year") == datetime.now().year
+        alert["is_partial_comparison"] = is_partial
+        alert["caveats"] = ["partial-year-comparison"] if is_partial else []
+        if is_partial:
+            alert["priority"] = max(1, alert["priority"] - 1)
+            alert["confidence"] = round(alert["confidence"] * 0.75, 2)
+
+    alerts.sort(key=lambda alert: (alert.get("observed_to") or "", alert["priority"], alert["confidence"], alert["alert_id"]), reverse=True)
     return alerts
 
 
@@ -704,6 +779,8 @@ def record_excerpt(record: dict[str, Any]) -> dict[str, Any]:
         "alert_flags": record["alert_flags"],
         "data_quality_flags": record["data_quality_flags"],
         "near_threshold": record["near_threshold"],
+        "legal_threshold_eur": record["legal_threshold_eur"],
+        "source_url": f"https://datos.vigo.org/data/sector-publico/contratos-menores-{str(record['source_year'])[-2:]}.json",
     }
 
 
@@ -927,11 +1004,23 @@ def build_timeline_section(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def build_meta(rows: list[dict[str, Any]], alerts: list[dict[str, Any]], topic_catalog: list[dict[str, Any]]) -> dict[str, Any]:
     years = sorted({row["source_year"] for row in rows})
+    dated_rows = [row["award_date"] for row in rows if row["award_date"]]
     return {
         "dataset": "contratos-menores-vigo",
+        "source_name": "Portal de datos abiertos del Concello de Vigo",
+        "source_url": "https://datos.vigo.org/",
+        "source_dataset_template": "https://datos.vigo.org/data/sector-publico/contratos-menores-{yy}.json",
         "last_refreshed": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "refresh_status": "ok",
         "available_years": years,
         "partial_years": years[-1:] if years else [],
+        "partial_year_explanation": "El ejercicio más reciente puede estar incompleto y cambia con cada actualización.",
+        "coverage": {
+            "dataset_start_year": years[0] if years else None,
+            "dataset_end_year": years[-1] if years else None,
+            "award_date_from": min(dated_rows) if dated_rows else None,
+            "award_date_to": max(dated_rows) if dated_rows else None,
+        },
         "row_count": len(rows),
         "entity_counts": {"vendors": len({row["vendor_id"] for row in rows}), "units": len({row["unit_id"] for row in rows})},
         "quality": {
@@ -947,6 +1036,65 @@ def build_meta(rows: list[dict[str, Any]], alerts: list[dict[str, Any]], topic_c
             "topics": [{"id": topic["id"], "label": topic["label"]} for topic in topic_catalog if topic["count"] > 0],
         },
         "alert_count": len(alerts),
+        "metric_definitions": {
+            "contract_count": "Filas o adjudicaciones publicadas en los JSON de origen.",
+            "unique_expedientes": "Expedientes distintos cuando existe identificador; en 2019 se usa una clave sintética.",
+            "single_bidder_pct": "Porcentaje calculado solo sobre filas con un número de licitadores válido y mayor que cero.",
+            "total_amount": "Suma del importe publicado, sin reinterpretar impuestos ni condiciones del expediente.",
+        },
+    }
+
+
+def alerts_for_rows(alerts: list[dict[str, Any]], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    record_ids = {row["record_id"] for row in rows}
+    return [alert for alert in alerts if any(record_id in record_ids for record_id in alert["related_record_ids"])]
+
+
+def concentration_for_ranking(ranking: list[dict[str, Any]]) -> dict[str, float]:
+    total = sum(item["total_amount"] for item in ranking) or 1
+    return {
+        "top1_share": round(sum(item["total_amount"] for item in ranking[:1]) / total, 4),
+        "top5_share": round(sum(item["total_amount"] for item in ranking[:5]) / total, 4),
+        "top10_share": round(sum(item["total_amount"] for item in ranking[:10]) / total, 4),
+    }
+
+
+def build_section_payloads(rows: list[dict[str, Any]], alerts: list[dict[str, Any]]) -> dict[str, Any]:
+    scoped_alerts = alerts_for_rows(alerts, rows)
+    vendor_ranking = rank_entities(rows, "vendor_id", "vendor_name", "unit_id")
+    unit_ranking = rank_entities(rows, "unit_id", "unit_name", "vendor_id")
+    dashboard = {
+        "summary": summarise_rows(rows),
+        "series": {"monthly": aggregate_timeseries(rows, "month"), "yearly": aggregate_timeseries(rows, "year")},
+        "types": [{"type": type_name, "count": count} for type_name, count in Counter(row["type_normalized"] for row in rows).most_common()],
+        "top_vendors": vendor_ranking[:10],
+        "top_units": unit_ranking[:10],
+        "latest_records": [record_excerpt(row) for row in sorted(rows, key=lambda row: (row["award_date"] or "", row["record_id"]), reverse=True)[:20]],
+        "heatmap": build_heatmap(rows),
+        "alerts": scoped_alerts[:12],
+    }
+    vendors = {
+        "ranking_by_amount": vendor_ranking,
+        "ranking_by_count": sorted(vendor_ranking, key=lambda item: (-item["contract_count"], -item["total_amount"], item["name"])),
+        "concentration": concentration_for_ranking(vendor_ranking),
+        "new_by_year": [],
+        "recurring": [],
+        "highlights": [alert for alert in scoped_alerts if alert["kind"] in {"vendor-growth", "fragmentation-pattern"}][:12],
+    }
+    units = {
+        "ranking_by_amount": unit_ranking,
+        "ranking_by_count": sorted(unit_ranking, key=lambda item: (-item["contract_count"], -item["total_amount"], item["name"])),
+        "high_spend_vs_fragmentation": [{"id": item["id"], "name": item["name"], "total_amount": item["total_amount"], "contract_count": item["contract_count"], "mean_amount": item["mean_amount"]} for item in unit_ranking[:25]],
+        "highlights": [alert for alert in scoped_alerts if alert["filters"].get("unit")][:12],
+    }
+    return {
+        "dashboard": dashboard,
+        "vendors": vendors,
+        "units": units,
+        "competition": build_competition_section(rows),
+        "amounts": build_amount_distribution(rows),
+        "topics": build_topics_section(rows),
+        "timeline": build_timeline_section(rows),
     }
 
 
@@ -983,6 +1131,21 @@ def build_artifacts(records: list[dict[str, Any]], audits: dict[str, Any]) -> di
         "top10_share": round(sum(item["total_amount"] for item in vendor_ranking[:10]) / vendor_total_amount, 4),
     }
 
+    unit_total_amount = sum(item["total_amount"] for item in unit_ranking) or 1
+    for ranking, details, total_amount in (
+        (vendor_ranking, vendor_details, vendor_total_amount),
+        (unit_ranking, unit_details, unit_total_amount),
+    ):
+        for index, item in enumerate(ranking):
+            detail = details[item["id"]]
+            detail["rank"] = index + 1
+            detail["share_of_total"] = round(item["total_amount"] / total_amount, 6)
+            detail["comparable_peers"] = [
+                {"id": peer["id"], "name": peer["name"], "total_amount": peer["total_amount"], "contract_count": peer["contract_count"]}
+                for peer in ranking[max(0, index - 2):index + 3]
+                if peer["id"] != item["id"]
+            ]
+
     dashboard = {
         "summary": summarise_rows(records),
         "series": {"monthly": aggregate_timeseries(records, "month"), "yearly": aggregate_timeseries(records, "year")},
@@ -1017,10 +1180,22 @@ def build_artifacts(records: list[dict[str, Any]], audits: dict[str, Any]) -> di
         "fragmentation": [alert for alert in alerts if alert["kind"] == "fragmentation-pattern"],
         "repeated_amounts": [alert for alert in alerts if alert["kind"] == "repeated-amounts"],
         "near_threshold_groups": [alert for alert in alerts if alert["kind"] == "near-threshold-group"],
+        "counts": {
+            "rule_types": len({alert["kind"] for alert in alerts}),
+            "grouped_cases": len({alert["family_id"] for alert in alerts}),
+            "individual_signals": len(alerts),
+        },
     }
     topics = build_topics_section(records)
     timeline = build_timeline_section(records)
     meta = build_meta(records, alerts, topic_catalog)
+
+    yearly_sections: dict[int, dict[str, Any]] = {}
+    for year in sorted({record["source_year"] for record in records}):
+        yearly_sections[year] = build_section_payloads(
+            [record for record in records if record["source_year"] == year],
+            alerts,
+        )
 
     explorer_years: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for record in records:
@@ -1043,11 +1218,12 @@ def build_artifacts(records: list[dict[str, Any]], audits: dict[str, Any]) -> di
         "patterns": patterns,
         "topics": topics,
         "timeline": timeline,
-        "vendor_index": [{"id": item["id"], "name": item["name"], "total_amount": item["total_amount"], "contract_count": item["contract_count"], "years": vendor_details[item["id"]]["totals"]["years"]} for item in vendor_ranking],
-        "unit_index": [{"id": item["id"], "name": item["name"], "total_amount": item["total_amount"], "contract_count": item["contract_count"], "years": unit_details[item["id"]]["totals"]["years"]} for item in unit_ranking],
+        "vendor_index": [{"id": item["id"], "name": item["name"], "aliases": sorted({row["vendor_raw"] for row in vendor_grouped[item["id"]] if row["vendor_raw"] != item["name"]}), "total_amount": item["total_amount"], "contract_count": item["contract_count"], "years": vendor_details[item["id"]]["totals"]["years"]} for item in vendor_ranking],
+        "unit_index": [{"id": item["id"], "name": item["name"], "aliases": sorted({row["unit_raw"] for row in unit_grouped[item["id"]] if row["unit_raw"] != item["name"]}), "total_amount": item["total_amount"], "contract_count": item["contract_count"], "years": unit_details[item["id"]]["totals"]["years"]} for item in unit_ranking],
         "vendor_details": vendor_details,
         "unit_details": unit_details,
         "explorer_years": explorer_years,
+        "yearly_sections": yearly_sections,
         "audits": audits,
         "canonical_records": records,
     }
@@ -1068,6 +1244,12 @@ def write_artifacts(artifacts: dict[str, Any], settings: dict[str, Any]) -> None
     write_json(derived_dir / "patterns.json", artifacts["patterns"])
     write_json(derived_dir / "topics.json", artifacts["topics"])
     write_json(derived_dir / "timeline.json", artifacts["timeline"])
+    section_names = ("dashboard", "vendors", "units", "competition", "amounts", "topics", "timeline")
+    for section_name in section_names:
+        write_json(derived_dir / section_name / "all.json", artifacts[section_name])
+    for year, sections in artifacts["yearly_sections"].items():
+        for section_name in section_names:
+            write_json(derived_dir / section_name / f"{year}.json", sections[section_name])
     write_json(derived_dir / "entities" / "vendors" / "index.json", artifacts["vendor_index"])
     write_json(derived_dir / "entities" / "units" / "index.json", artifacts["unit_index"])
 

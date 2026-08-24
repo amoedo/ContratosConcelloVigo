@@ -1,36 +1,13 @@
-﻿---
+---
 import BaseLayout from '@/components/layout/BaseLayout.astro';
 import PageHero from '@/components/layout/PageHero.astro';
-import { EChart } from '@/components/charts/EChart';
-import { AlertList } from '@/components/sections/AlertList';
-import { RankingList } from '@/components/sections/RankingList';
+import { YearlyAnalysis } from '@/components/sections/YearlyAnalysis';
 import { loadDerivedJson } from '@/lib/loadData';
-import { EMPTY_UNITS_PAGE, type UnitsPageData } from '@/lib/types';
-
+import { EMPTY_META, EMPTY_UNITS_PAGE, type MetaData, type UnitsPageData } from '@/lib/types';
 const data = await loadDerivedJson<UnitsPageData>('units.json', EMPTY_UNITS_PAGE);
-
-const topSpendOption = {
-  tooltip: { trigger: 'axis' },
-  grid: { left: 20, right: 20, bottom: 20, containLabel: true },
-  xAxis: { type: 'value' },
-  yAxis: { type: 'category', data: data.ranking_by_amount.slice(0, 10).map((item) => item.name), inverse: true },
-  series: [{ type: 'bar', data: data.ranking_by_amount.slice(0, 10).map((item) => item.total_amount), itemStyle: { color: '#005f73' } }],
-};
+const meta = await loadDerivedJson<MetaData>('meta.json', EMPTY_META);
 ---
-<BaseLayout title="Unidades | Contratos menores de Vigo" description="Qui&eacute;n gasta m&aacute;s, c&oacute;mo contrata y con qu&eacute; perfil de proveedores en el Concello de Vigo.">
-  <PageHero eyebrow="An&aacute;lisis por unidad" title="C&oacute;mo se reparte el gasto entre servicios municipales" copy="Comparativa entre unidades para detectar perfiles de contrataci&oacute;n distintos: muchas adjudicaciones peque&ntilde;as, pocos contratos de alto importe o dependencia de pocos proveedores." />
-
-  <section class="two-col section">
-    <div class="chart-card panel">
-      <h3 class="card-title">Top unidades por importe</h3>
-      <p class="card-subtitle">Vista directa de los servicios con m&aacute;s gasto agregado en contratos menores.</p>
-      <EChart client:visible option={topSpendOption} height={420} />
-    </div>
-    <AlertList alerts={data.highlights} title="Hallazgos por unidad" />
-  </section>
-
-  <section class="two-col section">
-    <RankingList items={data.ranking_by_amount.slice(0, 12)} hrefBase="/unidades" title="Ranking por importe" subtitle="Unidades con mayor volumen econ&oacute;mico agregado." />
-    <RankingList items={data.ranking_by_count.slice(0, 12)} hrefBase="/unidades" title="Ranking por adjudicaciones" subtitle="Servicios que m&aacute;s publican contratos menores en n&uacute;mero de filas." />
-  </section>
+<BaseLayout title="Unidades | Contratos de Vigo" titleGl="Unidades | Contratos de Vigo" description="Gasto y actividad de las unidades municipales de Vigo." descriptionGl="Gasto e actividade das unidades municipais de Vigo.">
+  <PageHero eyebrow="Unidades municipales" eyebrowGl="Unidades municipais" title="Qué áreas contratan más y con quién" titleGl="Que áreas contratan máis e con quen" copy="Compara el volumen, el importe y los proveedores de cada unidad en la serie completa o en un ejercicio concreto." copyGl="Compara o volume, o importe e os provedores de cada unidade na serie completa ou nun exercicio concreto." />
+  <YearlyAnalysis client:load section="units" initial={data} meta={meta} />
 </BaseLayout>

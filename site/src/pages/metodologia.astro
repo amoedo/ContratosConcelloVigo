@@ -1,26 +1,11 @@
-﻿---
-import BaseLayout from '@/components/layout/BaseLayout.astro';
-import PageHero from '@/components/layout/PageHero.astro';
 ---
-<BaseLayout title="Metodolog&iacute;a | Contratos menores de Vigo" description="Definiciones, l&iacute;mites del dato y criterios de normalizaci&oacute;n del proyecto.">
-  <PageHero eyebrow="Metodolog&iacute;a" title="C&oacute;mo se construye esta web y qu&eacute; cautelas conviene tener" copy="Definiciones de KPI, reglas de normalizaci&oacute;n, umbrales configurables y advertencias sobre calidad del dato original publicado por el Concello de Vigo." />
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import { MethodologyPage } from '@/components/methodology/MethodologyPage';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_META, type MetaData } from '@/lib/types';
 
-  <section class="page-columns section">
-    <article class="panel" style="padding: 1rem;">
-      <h3 class="card-title">Decisiones anal&iacute;ticas</h3>
-      <div class="stack">
-        <p>La m&eacute;trica principal de volumen cuenta filas publicadas en los JSON fuente. Cuando existe expediente, se expone tambi&eacute;n como m&eacute;trica secundaria.</p>
-        <p>Las series mensuales usan la fecha de adjudicaci&oacute;n. Las comparativas anuales se apoyan en el a&ntilde;o del dataset publicado.</p>
-        <p>Los nombres de adjudicatarios y unidades se limpian de espacios, saltos de l&iacute;nea y variantes societarias, pero las fusiones dudosas se env&iacute;an a revisi&oacute;n y no se aceptan autom&aacute;ticamente.</p>
-      </div>
-    </article>
-    <article class="panel" style="padding: 1rem;">
-      <h3 class="card-title">L&iacute;mites y cautelas</h3>
-      <div class="stack">
-        <p>Hay registros con campos nulos, fechas fuera del a&ntilde;o del dataset y a&ntilde;os en los que no existe expediente. Estas incidencias se muestran en m&eacute;tricas de calidad.</p>
-        <p>Las alertas son indicios calculados con reglas explicables. No implican irregularidad y siempre deben contrastarse con expediente, contexto administrativo y normativa vigente.</p>
-        <p>Los umbrales legales se leen desde configuraci&oacute;n versionada y se usan como referencia anal&iacute;tica, no como dictamen jur&iacute;dico.</p>
-      </div>
-    </article>
-  </section>
+const meta = await loadDerivedJson<MetaData>('meta.json', EMPTY_META);
+---
+<BaseLayout title="Metodología | Contratos menores de Vigo" titleGl="Metodoloxía | Contratos menores de Vigo" description="Origen, reglas, límites legales y criterios del análisis." descriptionGl="Orixe, regras, límites legais e criterios da análise.">
+  <MethodologyPage client:load meta={meta} />
 </BaseLayout>

@@ -1,64 +1,13 @@
-﻿---
+---
 import BaseLayout from '@/components/layout/BaseLayout.astro';
 import PageHero from '@/components/layout/PageHero.astro';
-import { EChart } from '@/components/charts/EChart';
-import { withBase } from '@/lib/base';
+import { YearlyAnalysis } from '@/components/sections/YearlyAnalysis';
 import { loadDerivedJson } from '@/lib/loadData';
-import { EMPTY_COMPETITION_PAGE, type CompetitionPageData } from '@/lib/types';
-
+import { EMPTY_COMPETITION_PAGE, EMPTY_META, type CompetitionPageData, type MetaData } from '@/lib/types';
 const data = await loadDerivedJson<CompetitionPageData>('competition.json', EMPTY_COMPETITION_PAGE);
-
-const distributionOption = {
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: data.distribution.map((item) => item.bucket) },
-  yAxis: { type: 'value' },
-  series: [{ type: 'bar', data: data.distribution.map((item) => item.count), itemStyle: { color: '#005f73' } }],
-};
-
-const amountByCompetition = {
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: data.average_amount_by_bucket.map((item) => item.bucket) },
-  yAxis: { type: 'value' },
-  series: [{ type: 'line', smooth: true, data: data.average_amount_by_bucket.map((item) => item.mean_amount), itemStyle: { color: '#bb3e03' } }],
-};
+const meta = await loadDerivedJson<MetaData>('meta.json', EMPTY_META);
 ---
-<BaseLayout title="Competencia | Contratos menores de Vigo" description="Distribuci&oacute;n de licitadores y se&ntilde;ales de baja competencia en contratos menores de Vigo.">
-  <PageHero eyebrow="Competencia" title="Cu&aacute;ntos licitadores compiten y d&oacute;nde escasea la concurrencia" copy="El campo num_licitadores permite comparar unidades, ver distribuci&oacute;n por tramos y aproximarse a la relaci&oacute;n entre competencia e importe." />
-
-  <section class="two-col section">
-    <div class="chart-card panel">
-      <h3 class="card-title">Distribuci&oacute;n por n&uacute;mero de licitadores</h3>
-      <p class="card-subtitle">Incluye categor&iacute;a separada para expedientes sin dato v&aacute;lido.</p>
-      <EChart client:visible option={distributionOption} height={360} />
-    </div>
-    <div class="chart-card panel">
-      <h3 class="card-title">Importe medio seg&uacute;n competencia</h3>
-      <p class="card-subtitle">Lectura exploratoria de si los importes m&aacute;s altos atraen m&aacute;s licitadores.</p>
-      <EChart client:visible option={amountByCompetition} height={360} />
-    </div>
-  </section>
-
-  <section class="table-card panel section">
-    <h3 class="card-title">Unidades con menor y mayor competencia</h3>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Unidad</th>
-          <th>Expedientes con dato</th>
-          <th>% un licitador</th>
-          <th>Licitadores medios</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.by_unit.map((item) => (
-          <tr>
-            <td><a href={withBase(`/unidades/${item.unit_id}`)}>{item.unit_name}</a></td>
-            <td>{item.known_contracts}</td>
-            <td>{item.single_bidder_pct}%</td>
-            <td>{item.average_bidders}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </section>
+<BaseLayout title="Competencia | Contratos de Vigo" titleGl="Competencia | Contratos de Vigo" description="Número de licitadores y competencia en contratos menores de Vigo." descriptionGl="Número de licitadores e competencia nos contratos menores de Vigo.">
+  <PageHero eyebrow="Competencia" eyebrowGl="Competencia" title="Dónde hay más y menos concurrencia" titleGl="Onde hai máis e menos concorrencia" copy="Los porcentajes se calculan sobre registros con un número de licitadores válido; el denominador siempre se muestra." copyGl="As porcentaxes calcúlanse sobre rexistros cun número de licitadores válido; o denominador móstrase sempre." />
+  <YearlyAnalysis client:load section="competition" initial={data} meta={meta} />
 </BaseLayout>

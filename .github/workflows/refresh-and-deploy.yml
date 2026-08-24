@@ -41,7 +41,7 @@ jobs:
 
       - name: Install site deps
         working-directory: site
-        run: npm install
+        run: npm ci
 
       - name: Refresh derived data
         run: python -m contratos_vigo refresh --all

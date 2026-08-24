@@ -27,10 +27,13 @@ jobs:
 
       - name: Install site deps
         working-directory: site
-        run: npm install
+        run: npm ci
 
       - name: Run pipeline tests
         run: python -m pytest pipeline/tests -q
+
+      - name: Generate fixture data for browser tests
+        run: python -m contratos_vigo build-fixtures
 
       - name: Run web unit tests
         working-directory: site
@@ -43,3 +46,11 @@ jobs:
       - name: Build site
         working-directory: site
         run: npm run build
+
+      - name: Install browser
+        working-directory: site
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser and accessibility tests
+        working-directory: site
+        run: npm run test:e2e

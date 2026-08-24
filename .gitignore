@@ -11,12 +11,10 @@ __pycache__/
 coverage/
 playwright-report/
 test-results/
+.playwright-mcp/
 pipeline/data/raw/*.json
 pipeline/data/canonical/*.json
 pipeline/data/reports/*.json
 pipeline/data/reports/*.csv
-site/public/data/derived/*.json
-site/public/data/derived/entities/vendors/*.json
-site/public/data/derived/entities/units/*.json
-site/public/data/derived/explorer/*.json
+site/public/data/derived/**/*.json
 !.gitkeep

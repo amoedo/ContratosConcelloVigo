@@ -6,6 +6,7 @@ import { EChart } from '@/components/charts/EChart';
 import { AlertList } from '@/components/sections/AlertList';
 import { RecordsTable } from '@/components/sections/RecordsTable';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
+import { withBase } from '@/lib/base';
 import { loadDerivedJson } from '@/lib/loadData';
 import { createEmptyEntityDetail, type EntityDetail, type EntityIndexItem } from '@/lib/types';
 
@@ -35,34 +36,42 @@ const counterpartyOption = {
   series: [{ type: 'bar', data: detail.top_counterparties.slice(0, 10).map((item) => item.amount), itemStyle: { color: '#7c6a0a' } }],
 };
 ---
-<BaseLayout title={`${detail.entity_name} | Unidades`} description={`Ficha de la unidad ${detail.entity_name}.`}>
-  <Breadcrumbs items={[{ label: 'Unidades', href: '/unidades' }, { label: detail.entity_name }]} />
-  <PageHero eyebrow="Ficha de unidad" title={detail.entity_name} copy="Visi&oacute;n de gasto, adjudicatarios dominantes, competencia media y se&ntilde;ales relacionadas con esta unidad municipal." />
+<BaseLayout title={`${detail.entity_name} | Unidades`} titleGl={`${detail.entity_name} | Unidades`} description={`Ficha de la unidad ${detail.entity_name}.`} descriptionGl={`Ficha da unidade ${detail.entity_name}.`}>
+  <Breadcrumbs client:load items={[{ label: 'Unidades', labelGl: 'Unidades', href: '/unidades' }, { label: detail.entity_name }]} />
+  <PageHero eyebrow="Ficha de unidad" eyebrowGl="Ficha de unidade" title={detail.entity_name} copy="Visión de gasto, adjudicatarios dominantes, competencia media y señales relacionadas con esta unidad municipal." copyGl="Visión de gasto, adxudicatarios dominantes, competencia media e sinais relacionados con esta unidade municipal." />
 
   <section class="grid metrics section">
     <article class="stat-card"><span>Importe total</span><strong>{formatCurrency(detail.totals.total_amount)}</strong></article>
-    <article class="stat-card"><span>Adjudicaciones</span><strong>{formatNumber(detail.totals.contract_count)}</strong></article>
-    <article class="stat-card"><span>Adjudicatarios</span><strong>{formatNumber(detail.totals.unique_vendors)}</strong></article>
+    <article class="stat-card"><span><span data-lang="es">Adjudicaciones</span><span data-lang="gl">Adxudicacións</span></span><strong>{formatNumber(detail.totals.contract_count)}</strong></article>
+    <article class="stat-card"><span><span data-lang="es">Adjudicatarios</span><span data-lang="gl">Adxudicatarios</span></span><strong>{formatNumber(detail.totals.unique_vendors)}</strong></article>
     <article class="stat-card"><span>% un licitador</span><strong>{formatPercent(detail.competition.single_bidder_pct)}</strong></article>
+    <article class="stat-card"><span><span data-lang="es">Posición por importe</span><span data-lang="gl">Posición por importe</span></span><strong>#{formatNumber(detail.rank ?? 0)}</strong></article>
+    <article class="stat-card"><span><span data-lang="es">Cuota del importe total</span><span data-lang="gl">Cota do importe total</span></span><strong>{formatPercent((detail.share_of_total ?? 0) * 100)}</strong></article>
+  </section>
+
+  <section class="profile-context panel section">
+    <div><span class="kicker">Contexto</span><h2 class="card-title"><span data-lang="es">Actividad y comparables</span><span data-lang="gl">Actividade e comparables</span></h2><p><span data-lang="es">Aparece en {detail.totals.years.join(', ')}. La competencia se calcula sobre {formatNumber(detail.totals.known_competition_count)} registros con dato válido.</span><span data-lang="gl">Aparece en {detail.totals.years.join(', ')}. A competencia calcúlase sobre {formatNumber(detail.totals.known_competition_count)} rexistros con dato válido.</span></p><div class="badge-row">{detail.topics.slice(0, 6).map((topic) => <span class="badge">{topic.label} · {topic.count}</span>)}</div></div>
+    <div><h3><span data-lang="es">Unidades cercanas en el ranking</span><span data-lang="gl">Unidades próximas no ranking</span></h3><ul class="peer-list">{detail.comparable_peers?.map((peer) => <li><a href={withBase(`/unidades/${peer.id}`)}>{peer.name}</a><strong>{formatCurrency(peer.total_amount)}</strong></li>)}</ul></div>
+    <a class="pill-link pill-link--accent" href={`${withBase('/explorador')}?unit=${detail.entity_id}`}><span data-lang="es">Ver todas las filas de esta unidad</span><span data-lang="gl">Ver todas as filas desta unidade</span></a>
   </section>
 
   <section class="two-col section">
     <div class="chart-card panel">
-      <h3 class="card-title">Evoluci&oacute;n anual</h3>
+      <h3 class="card-title"><span data-lang="es">Evolución anual</span><span data-lang="gl">Evolución anual</span></h3>
       <EChart client:visible option={yearlyOption} height={360} />
     </div>
     <div class="chart-card panel">
-      <h3 class="card-title">Adjudicatarios m&aacute;s frecuentes</h3>
+      <h3 class="card-title"><span data-lang="es">Adjudicatarios más frecuentes</span><span data-lang="gl">Adxudicatarios máis frecuentes</span></h3>
       <EChart client:visible option={counterpartyOption} height={360} />
     </div>
   </section>
 
   <section class="two-col section">
-    <AlertList alerts={detail.pattern_clusters} title="Alertas vinculadas" />
-    <RecordsTable rows={detail.near_threshold_records} title="Casos cercanos al umbral" />
+    <AlertList client:load alerts={detail.pattern_clusters} title="Alertas vinculadas" titleGl="Alertas vinculadas" />
+    <RecordsTable client:load rows={detail.near_threshold_records} title="Casos cercanos al umbral" titleGl="Casos preto do limiar" />
   </section>
 
   <section class="section">
-    <RecordsTable rows={detail.recent_records} title="Registros recientes" />
+    <RecordsTable client:load rows={detail.recent_records} title="Registros recientes" titleGl="Rexistros recentes" />
   </section>
 </BaseLayout>

@@ -3,13 +3,16 @@ interface Props {
   title: string;
   eyebrow: string;
   copy: string;
+  titleGl?: string;
+  eyebrowGl?: string;
+  copyGl?: string;
 }
 
-const { title, eyebrow, copy } = Astro.props;
+const { title, eyebrow, copy, titleGl = title, eyebrowGl = eyebrow, copyGl = copy } = Astro.props;
 ---
 <section class="panel hero section">
-  <div class="hero-eyebrow">{eyebrow}</div>
-  <h2 class="hero-title">{title}</h2>
-  <p class="hero-copy">{copy}</p>
+  <div class="hero-eyebrow"><span data-lang="es">{eyebrow}</span><span data-lang="gl">{eyebrowGl}</span></div>
+  <h1 class="hero-title"><span data-lang="es">{title}</span><span data-lang="gl">{titleGl}</span></h1>
+  <p class="hero-copy"><span data-lang="es">{copy}</span><span data-lang="gl">{copyGl}</span></p>
   <slot />
 </section>

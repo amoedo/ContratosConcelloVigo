@@ -7,6 +7,17 @@ export interface FilterState {
   amount: string;
   topic: string;
   q: string;
+  date_from: string;
+  date_to: string;
+  min_amount: string;
+  max_amount: string;
+  expediente: string;
+  alert: string;
+  quality: string;
+  sort: string;
+  direction: string;
+  page: string;
+  lang: string;
 }
 
 export const defaultFilters: FilterState = {
@@ -18,6 +29,8 @@ export const defaultFilters: FilterState = {
   amount: '',
   topic: '',
   q: '',
+  date_from: '', date_to: '', min_amount: '', max_amount: '', expediente: '', alert: '', quality: '',
+  sort: 'date', direction: 'desc', page: '1', lang: '',
 };
 
 export function readFilters(search: string): FilterState {
@@ -31,6 +44,17 @@ export function readFilters(search: string): FilterState {
     amount: params.get('amount') ?? '',
     topic: params.get('topic') ?? '',
     q: params.get('q') ?? '',
+    date_from: params.get('date_from') ?? '',
+    date_to: params.get('date_to') ?? '',
+    min_amount: params.get('min_amount') ?? '',
+    max_amount: params.get('max_amount') ?? '',
+    expediente: params.get('expediente') ?? '',
+    alert: params.get('alert') ?? '',
+    quality: params.get('quality') ?? '',
+    sort: params.get('sort') ?? 'date',
+    direction: params.get('direction') ?? 'desc',
+    page: params.get('page') ?? '1',
+    lang: params.get('lang') ?? '',
   };
 }
 

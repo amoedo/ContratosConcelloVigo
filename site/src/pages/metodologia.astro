@@ -1,21 +1,11 @@
-﻿---
-import BaseLayout from '@/components/layout/BaseLayout.astro';
-import PageHero from '@/components/layout/PageHero.astro';
-import { CollapsibleSection } from '@/components/sections/CollapsibleSection';
 ---
-<BaseLayout title="Metodología | Contratos menores de Vigo" description="Definiciones, límites del dato y criterios de normalización del proyecto.">
-  <PageHero eyebrow="Metodología" title="Cómo se construye esta web y qué cautelas conviene tener" copy="Definiciones de métricas, reglas de normalización, umbrales configurables y advertencias sobre calidad del dato original publicado por el Concello de Vigo." />
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import { MethodologyPage } from '@/components/methodology/MethodologyPage';
+import { loadDerivedJson } from '@/lib/loadData';
+import { EMPTY_META, type MetaData } from '@/lib/types';
 
-  <section class="page-columns section">
-    <CollapsibleSection title="Decisiones analíticas" defaultOpen={true} client:load>
-      <p>La métrica principal de volumen cuenta filas publicadas en los JSON fuente. Cuando existe expediente, se expone también como métrica secundaria.</p>
-      <p>Las series mensuales usan la fecha de adjudicación. Las comparativas anuales se apoyan en el año del dataset publicado.</p>
-      <p>Los nombres de adjudicatarios y unidades se limpian de espacios, saltos de línea y variantes societarias, pero las fusiones dudosas se envían a revisión y no se aceptan automáticamente.</p>
-    </CollapsibleSection>
-    <CollapsibleSection title="Límites y cautelas" defaultOpen={true} client:load>
-      <p>Hay registros con campos nulos, fechas fuera del año del dataset y años en los que no existe expediente. Estas incidencias se muestran en métricas de calidad.</p>
-      <p>Las alertas son indicios calculados con reglas explicables. No implican irregularidad y siempre deben contrastarse con expediente, contexto administrativo y normativa vigente.</p>
-      <p>Los umbrales legales se leen desde configuración versionada y se usan como referencia analítica, no como dictamen jurídico.</p>
-    </CollapsibleSection>
-  </section>
+const meta = await loadDerivedJson<MetaData>('meta.json', EMPTY_META);
+---
+<BaseLayout title="Metodología | Contratos menores de Vigo" titleGl="Metodoloxía | Contratos menores de Vigo" description="Origen, reglas, límites legales y criterios del análisis." descriptionGl="Orixe, regras, límites legais e criterios da análise.">
+  <MethodologyPage client:load meta={meta} />
 </BaseLayout>

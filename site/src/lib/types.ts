@@ -10,6 +10,18 @@ export interface AlertItem {
   evidence: Record<string, unknown>;
   filters: Record<string, string>;
   related_record_ids: string[];
+  family_id?: string;
+  confidence?: number;
+  priority?: number;
+  rule_version?: string;
+  rule_parameters?: Record<string, unknown>;
+  affected_count?: number;
+  known_data_denominator?: number | null;
+  evidence_totals?: Record<string, unknown>;
+  observed_from?: string | null;
+  observed_to?: string | null;
+  is_partial_comparison?: boolean;
+  caveats?: string[];
 }
 
 export interface MetaData {
@@ -27,6 +39,13 @@ export interface MetaData {
     topics: Array<{ id: string; label: string }>;
   };
   alert_count: number;
+  source_name?: string;
+  source_url?: string;
+  source_dataset_template?: string;
+  refresh_status?: string;
+  partial_year_explanation?: string;
+  coverage?: { dataset_start_year: number | null; dataset_end_year: number | null; award_date_from: string | null; award_date_to: string | null };
+  metric_definitions?: Record<string, string>;
 }
 
 export interface SummaryKpis {
@@ -87,6 +106,8 @@ export interface RecordExcerpt {
   subject_clean?: string;
   topic_ids?: string[];
   search_terms?: Array<{ term: string; weight: number }>;
+  legal_threshold_eur?: number;
+  source_url?: string;
 }
 
 export interface DashboardData {
@@ -120,6 +141,9 @@ export interface EntityDetail {
   near_threshold_records: RecordExcerpt[];
   pattern_clusters: AlertItem[];
   recent_records: RecordExcerpt[];
+  rank?: number;
+  share_of_total?: number;
+  comparable_peers?: Array<{ id: string; name: string; total_amount: number; contract_count: number }>;
 }
 
 export interface ExplorerYearPayload {
@@ -130,6 +154,10 @@ export interface ExplorerYearPayload {
 export interface EntityIndexItem {
   id: string;
   name: string;
+  aliases?: string[];
+  total_amount?: number;
+  contract_count?: number;
+  years?: number[];
 }
 
 export interface VendorsPageData {
@@ -164,10 +192,10 @@ export interface AmountsPageData {
 }
 
 export interface TopicsPageData {
-  ranking: Array<{ id: string; label: string; total_amount: number; count: number }>;
-  yearly: Array<{ year: number; topic_id: string; label: string; total_amount: number; count: number }>;
+  ranking: Array<{ topic_id: string; label: string; total_amount: number; contract_count: number }>;
+  yearly: Array<{ year: number; topic_id: string; label: string; amount: number; count: number }>;
   clusters: Array<{ label: string; count: number }>;
-  top_terms: Array<{ term: string; weight?: number }>;
+  top_terms: Array<{ term: string; count?: number; weight?: number }>;
 }
 
 export interface TimelinePageData {
@@ -181,6 +209,7 @@ export interface PatternsPageData {
   fragmentation: AlertItem[];
   repeated_amounts: AlertItem[];
   near_threshold_groups: AlertItem[];
+  counts: { rule_types: number; grouped_cases: number; individual_signals: number };
 }
 
 export const EMPTY_META: MetaData = {
@@ -267,6 +296,7 @@ export const EMPTY_PATTERNS_PAGE: PatternsPageData = {
   fragmentation: [],
   repeated_amounts: [],
   near_threshold_groups: [],
+  counts: { rule_types: 0, grouped_cases: 0, individual_signals: 0 },
 };
 
 export function createEmptyEntityDetail(entityId: string, entityType: 'vendor' | 'unit', entityName: string): EntityDetail {

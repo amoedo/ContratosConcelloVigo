@@ -1,0 +1,10 @@
+{
+  "name": "Contratos abiertos de Vigo",
+  "short_name": "Contratos Vigo",
+  "description": "Exploración cívica de la contratación menor publicada por el Concello de Vigo.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4efe4",
+  "theme_color": "#0b6573",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

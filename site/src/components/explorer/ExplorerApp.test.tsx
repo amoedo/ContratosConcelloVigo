@@ -118,8 +118,8 @@ describe('ExplorerApp', () => {
   it('sorts rows when a column header is clicked', async () => {
     render(<ExplorerApp />);
 
-    await screen.findByText('Gamma');
-    expect(getSubjectOrder()).toEqual(['Beta', 'Alpha', 'Gamma']);
+    expect(await screen.findAllByText('Gamma')).toHaveLength(2);
+    expect(getSubjectOrder()).toEqual(['Gamma', 'Alpha', 'Beta']);
 
     const subjectHeader = screen.getByRole('button', { name: /asunto/i });
     fireEvent.click(subjectHeader);

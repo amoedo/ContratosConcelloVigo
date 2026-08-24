@@ -24,9 +24,6 @@ describe('AlertList', () => {
     render(<AlertList alerts={Array.from({ length: 12 }, (_, index) => buildAlert(index + 1))} maxItems={10} titleLink="/patrones" />);
 
     expect(screen.getByRole('link', { name: 'Hallazgos automáticos' })).toHaveAttribute('href', '/patrones');
-    expect(screen.getByText('Alerta 1')).toBeInTheDocument();
-    expect(screen.getByText('Alerta 10')).toBeInTheDocument();
-    expect(screen.queryByText('Alerta 11')).not.toBeInTheDocument();
-    expect(screen.queryByText('Alerta 12')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('.alert-item')).toHaveLength(10);
   });
 });

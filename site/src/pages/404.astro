@@ -1,0 +1,7 @@
+---
+import BaseLayout from '@/components/layout/BaseLayout.astro';
+import { withBase } from '@/lib/base';
+---
+<BaseLayout title="Página no encontrada | Contratos de Vigo" titleGl="Páxina non atopada | Contratos de Vigo" description="La página solicitada no existe." descriptionGl="A páxina solicitada non existe.">
+  <section class="civic-hero panel"><div><div class="kicker">Error 404</div><h1><span data-lang="es">Esta ruta no contiene datos</span><span data-lang="gl">Esta ruta non contén datos</span></h1><p><span data-lang="es">Puede que el enlace haya cambiado o que la entidad ya no exista con ese identificador.</span><span data-lang="gl">Pode que a ligazón cambiase ou que a entidade xa non exista con ese identificador.</span></p><div class="ribbon-nav"><a href={withBase('/')} data-lang="es">Volver al inicio</a><a href={`${withBase('/')}?lang=gl`} data-lang="gl">Volver ao inicio</a><a href={withBase('/explorador')} data-lang="es">Abrir el explorador</a><a href={`${withBase('/explorador')}?lang=gl`} data-lang="gl">Abrir o explorador</a></div></div></section>
+</BaseLayout>

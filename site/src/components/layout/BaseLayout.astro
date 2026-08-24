@@ -1,14 +1,17 @@
 ﻿---
 import '@/styles/global.css';
 import { HeaderNav } from '@/components/layout/HeaderNav';
-import { FilterBar } from '@/components/layout/FilterBar';
+import { withBase } from '@/lib/base';
 
 interface Props {
   title: string;
   description: string;
+  titleGl?: string;
+  descriptionGl?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, titleGl = title, descriptionGl = description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
 ---
 <!doctype html>
 <html lang="es">
@@ -17,40 +20,46 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={canonical} />
+    <link rel="alternate" hreflang="gl" href={`${canonical}?lang=gl`} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#0b4f5c" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
+    <script define:vars={{ titleGl, descriptionGl }} is:inline>
+      const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
+      const activeLanguage = requestedLanguage === 'gl' || (!requestedLanguage && localStorage.getItem('contratos-vigo-language') === 'gl') ? 'gl' : 'es';
+      document.documentElement.lang = activeLanguage;
+      if (activeLanguage === 'gl') {
+        document.title = titleGl;
+        const descriptionNode = document.querySelector('meta[name="description"]');
+        if (descriptionNode) descriptionNode.setAttribute('content', descriptionGl);
+      }
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#contenido">Saltar ao contido / Saltar al contenido</a>
     <div class="bg-orb bg-orb-a"></div>
     <div class="bg-orb bg-orb-b"></div>
     <div class="bg-grid"></div>
 
-    <main class="site-shell">
+    <div class="site-shell">
       <HeaderNav client:load />
-      <FilterBar client:load />
 
-      <div class="content-stack">
+      <main id="contenido" class="content-stack">
         <slot />
-      </div>
+      </main>
 
       <footer class="site-footer panel">
-        <div class="site-footer__top">
-          <div>
-            <div class="kicker">Metodología y contexto</div>
-            <h2 class="card-title">Web estática, cálculo offline y lectura prudente</h2>
-          </div>
-          <div class="badge-row">
-            <span class="badge">Cliente puro</span>
-            <span class="badge">JSON derivados</span>
-            <span class="badge">GitHub Pages</span>
-          </div>
-        </div>
-        <p>
-          Proyecto estático para GitHub Pages. Los cálculos se generan fuera de línea, la metodología se documenta en su sección específica
-          y cualquier hallazgo debe leerse como una señal analítica, no como una conclusión jurídica.
-        </p>
+        <p data-lang="es">Datos publicados por el Concello de Vigo. Consulta cómo se procesan y qué límites tiene el análisis.</p>
+        <p data-lang="gl">Datos publicados polo Concello de Vigo. Consulta como se procesan e que límites ten a análise.</p>
+        <nav aria-label="Enlaces del pie"><a href={withBase('/metodologia')} data-lang="es">Metodología</a><a href={`${withBase('/metodologia')}?lang=gl`} data-lang="gl">Metodoloxía</a><a href="https://datos.vigo.org/" target="_blank" rel="noreferrer"><span data-lang="es">Fuente oficial</span><span data-lang="gl">Fonte oficial</span> ↗</a></nav>
       </footer>
-    </main>
+    </div>
   </body>
 </html>

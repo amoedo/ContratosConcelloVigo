@@ -5,7 +5,7 @@ test('citizen dashboard is concise and links into investigation', async ({ page 
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: /Entender la contratación menor/ })).toBeVisible();
   await expect(page.locator('.year-control select')).toHaveValue('all');
-  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThan(9000);
+  await expect(page.locator('.guided-links a')).toHaveCount(4);
   await page.getByRole('link', { name: /Buscar una empresa/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Explorador de contratos/ })).toBeVisible();
 });

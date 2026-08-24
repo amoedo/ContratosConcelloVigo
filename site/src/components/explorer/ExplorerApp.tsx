@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { withBase, withDataPath } from '@/lib/base';
 import { defaultFilters, readFilters, type FilterState } from '@/lib/filters';
@@ -76,6 +76,14 @@ export function ExplorerApp() {
     });
   };
 
+  const toggleSort = (sort: string) => {
+    setFilters((current) => {
+      const next = { ...current, sort, direction: current.sort === sort && current.direction === 'asc' ? 'desc' : 'asc', page: '1' };
+      window.history.replaceState(null, '', `${window.location.pathname}${buildSearch(next)}`);
+      return next;
+    });
+  };
+
   const filtered = useMemo(() => filterExplorerRows(rows, filters), [filters, rows]);
 
   const sorted = useMemo(() => sortExplorerRows(filtered, filters.sort, filters.direction), [filtered, filters.direction, filters.sort]);
@@ -119,12 +127,17 @@ export function ExplorerApp() {
 
     <div className="results-toolbar"><strong>{loading ? copy.loading : `${formatNumber(sorted.length)} ${copy.results}`}</strong><span>{copy.page} {page} / {totalPages}</span></div>
     {!loading && !visible.length ? <div className="empty-state">{copy.noResults}</div> : <>
-      <div className="explorer-table panel"><table className="data-table"><thead><tr><th>{copy.date}</th><th>{copy.subject}</th><th>{copy.unit}</th><th>{copy.vendor}</th><th>{copy.amount}</th><th>{copy.bidders}</th><th /></tr></thead><tbody>{visible.map((row) => <tr key={row.record_id}><td>{formatDate(row.award_date)}</td><td>{row.subject_raw}</td><td><a href={withLanguage(withBase(`/unidades/${row.unit_id}`), language)}>{row.unit_name}</a></td><td><a href={withLanguage(withBase(`/adjudicatarios/${row.vendor_id}`), language)}>{row.vendor_name}</a></td><td>{formatCurrency(row.importe_eur)}</td><td>{row.licitadores_raw ?? '—'}</td><td><button className="text-button" onClick={() => setSelected(row)}>{copy.details}</button></td></tr>)}</tbody></table></div>
+      <div className="explorer-table panel"><table className="data-table"><thead><tr><SortHeader id="date" label={copy.date} filters={filters} toggle={toggleSort} /><SortHeader id="subject" label={copy.subject} filters={filters} toggle={toggleSort} /><SortHeader id="unit" label={copy.unit} filters={filters} toggle={toggleSort} /><SortHeader id="vendor" label={copy.vendor} filters={filters} toggle={toggleSort} /><SortHeader id="amount" label={copy.amount} filters={filters} toggle={toggleSort} /><SortHeader id="bidders" label={copy.bidders} filters={filters} toggle={toggleSort} /><th /></tr></thead><tbody>{visible.map((row) => <tr key={row.record_id}><td>{formatDate(row.award_date)}</td><td>{row.subject_raw}</td><td><a href={withLanguage(withBase(`/unidades/${row.unit_id}`), language)}>{row.unit_name}</a></td><td><a href={withLanguage(withBase(`/adjudicatarios/${row.vendor_id}`), language)}>{row.vendor_name}</a></td><td>{formatCurrency(row.importe_eur)}</td><td>{row.licitadores_raw ?? '—'}</td><td><button className="text-button" onClick={() => setSelected(row)}>{copy.details}</button></td></tr>)}</tbody></table></div>
       <div className="record-cards">{visible.map((row) => <article className="panel" key={row.record_id}><span>{formatDate(row.award_date)} · {row.type_normalized}</span><h2>{row.subject_raw}</h2><p>{row.vendor_name}<br />{row.unit_name}</p><strong>{formatCurrency(row.importe_eur)}</strong><button className="text-button" onClick={() => setSelected(row)}>{copy.details} →</button></article>)}</div>
       <nav className="pagination" aria-label="Paginación"><button disabled={page <= 1} onClick={() => update('page', String(page - 1))}>{copy.previous}</button><span>{copy.page} {page} / {totalPages}</span><button disabled={page >= totalPages} onClick={() => update('page', String(page + 1))}>{copy.next}</button></nav>
     </>}
     {selected && <RecordDrawer record={selected} close={() => setSelected(null)} language={language} sourceLabel={copy.source} />}
   </section>;
+}
+
+function SortHeader({ id, label, filters, toggle }: { id: string; label: string; filters: FilterState; toggle: (id: string) => void }) {
+  const active = filters.sort === id;
+  return <th aria-sort={active ? (filters.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><button className="table-sort-button" type="button" onClick={() => toggle(id)}>{label}{active ? (filters.direction === 'asc' ? ' ↑' : ' ↓') : ''}</button></th>;
 }
 
 function ComparisonPanel({ vendors, units, title, language }: { vendors: EntityIndexItem[]; units: EntityIndexItem[]; title: string; language: 'es' | 'gl' }) {

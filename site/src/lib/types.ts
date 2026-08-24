@@ -4,6 +4,7 @@ export interface AlertItem {
   alert_id: string;
   kind: string;
   severity: Severity;
+  sort_date?: string | null;
   title: string;
   summary: string;
   evidence: Record<string, unknown>;

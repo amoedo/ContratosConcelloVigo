@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import math
+import time
+import urllib.error
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
@@ -309,6 +311,11 @@ def load_raw_datasets(settings: dict[str, Any], years: list[int] | None = None) 
 
 
 
+_DOWNLOAD_TIMEOUT = 60
+_DOWNLOAD_MAX_RETRIES = 3
+_DOWNLOAD_RETRY_DELAY = 5
+
+
 def download_year(year: int, settings: dict[str, Any], force: bool = False) -> Path:
     raw_dir: Path = settings["raw_dir"]
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -317,10 +324,17 @@ def download_year(year: int, settings: dict[str, Any], force: bool = False) -> P
     if output.exists() and not force:
         return output
     url = settings["source_url_template"].format(suffix=suffix)
-    with urlopen(url) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-    write_json(output, payload)
-    return output
+    for attempt in range(_DOWNLOAD_MAX_RETRIES):
+        try:
+            with urlopen(url, timeout=_DOWNLOAD_TIMEOUT) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            write_json(output, payload)
+            return output
+        except (urllib.error.URLError, OSError):
+            if attempt < _DOWNLOAD_MAX_RETRIES - 1:
+                time.sleep(_DOWNLOAD_RETRY_DELAY * (attempt + 1))
+            else:
+                raise
 
 
 
@@ -493,7 +507,21 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     alerts: list[dict[str, Any]] = []
     by_record = {record["record_id"]: record for record in records}
 
+    def alert_sort_date(alert: dict[str, Any]) -> str | None:
+        related_rows = [by_record[record_id] for record_id in alert["related_record_ids"] if record_id in by_record]
+        related_dates = [parse_date(row["award_date"]) for row in related_rows if row.get("award_date")]
+        if related_dates:
+            return max(related_dates).isoformat()
+        related_years = [row["source_year"] for row in related_rows if row.get("source_year") is not None]
+        if related_years:
+            return f"{max(related_years)}-12-31"
+        year = alert.get("filters", {}).get("year")
+        if year:
+            return f"{year}-12-31"
+        return None
+
     def register_alert(alert: dict[str, Any]) -> None:
+        alert["sort_date"] = alert_sort_date(alert)
         alerts.append(alert)
         for record_id in alert["related_record_ids"]:
             if record_id in by_record and alert["kind"] not in by_record[record_id]["alert_flags"]:
@@ -1291,4 +1319,3 @@ def build_from_fixture_directory(fixture_dir: Path, settings: dict[str, Any] | N
         year = int(path.stem.split("-")[-1])
         raw_by_year[year] = read_json(path, default=[])
     return build_from_raw(raw_by_year, resolved_settings)
-

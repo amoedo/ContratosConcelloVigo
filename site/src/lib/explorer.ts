@@ -34,6 +34,7 @@ export function sortExplorerRows(rows: RecordExcerpt[], sort: string, direction:
   return rows.slice().sort((left, right) => {
     let result = 0;
     if (sort === 'amount') result = left.importe_eur - right.importe_eur;
+    else if (sort === 'subject') result = left.subject_raw.localeCompare(right.subject_raw);
     else if (sort === 'vendor') result = left.vendor_name.localeCompare(right.vendor_name);
     else if (sort === 'unit') result = left.unit_name.localeCompare(right.unit_name);
     else if (sort === 'bidders') result = (left.licitadores_raw ?? -1) - (right.licitadores_raw ?? -1);

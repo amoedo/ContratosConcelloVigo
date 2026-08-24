@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import json
+import urllib.error
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from contratos_vigo.pipeline import build_alerts, build_from_raw, canonicalize_records, read_json, threshold_for_record
+import pytest
+
+from contratos_vigo.pipeline import build_alerts, build_from_raw, canonicalize_records, download_year, read_json, threshold_for_record
 from contratos_vigo.settings import load_settings
 
 FIXTURE_DIR = Path(__file__).parent / 'fixtures'
@@ -91,3 +96,31 @@ def test_legal_thresholds_distinguish_works_from_services_and_supplies() -> None
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'obra'}, settings) == 40000
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'servicio'}, settings) == 15000
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'suministro'}, settings) == 15000
+
+
+def test_download_year_retries_on_transient_error(tmp_path: Path) -> None:
+    settings = load_settings()
+    settings['raw_dir'] = tmp_path / 'raw'
+    settings['source_url_template'] = 'https://example.com/data-{suffix}.json'
+    response_mock = MagicMock()
+    response_mock.__enter__ = lambda value: value
+    response_mock.__exit__ = MagicMock(return_value=False)
+    response_mock.read.return_value = json.dumps([{'id': 1}]).encode('utf-8')
+
+    with patch('contratos_vigo.pipeline.urlopen', side_effect=[urllib.error.URLError('connection refused'), response_mock]) as mock_urlopen, \
+         patch('contratos_vigo.pipeline.time.sleep') as mock_sleep:
+        result = download_year(2024, settings, force=True)
+
+    assert result.exists()
+    assert mock_urlopen.call_count == 2
+    mock_sleep.assert_called_once_with(5)
+
+
+def test_download_year_raises_after_all_retries_exhausted(tmp_path: Path) -> None:
+    settings = load_settings()
+    settings['raw_dir'] = tmp_path / 'raw'
+    settings['source_url_template'] = 'https://example.com/data-{suffix}.json'
+    with patch('contratos_vigo.pipeline.urlopen', side_effect=urllib.error.URLError('connection timed out')), \
+         patch('contratos_vigo.pipeline.time.sleep'):
+        with pytest.raises(urllib.error.URLError):
+            download_year(2024, settings, force=True)

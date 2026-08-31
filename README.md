@@ -1,27 +1,21 @@
-# Contratos menores do Concello de Vigo / Contratos menores del Concello de Vigo
+# Contratos menores do Concello de Vigo
 
-[English](#english)
+[Galego](#galego) · [Español](#español) · [English](#english)
 
-Proxecto aberto para facilitar a consulta, a análise e a reutilización dos contratos menores publicados polo Concello de Vigo. Combina un proceso reproducible de preparación de datos con unha web estática pensada para achegar información pública a persoas investigadoras, xornalistas, entidades e cidadanía.
+## Galego
 
-El proyecto analiza las publicaciones anuales de contratos menores del Concello de Vigo y las presenta en una interfaz navegable. Su objetivo es hacer más accesibles los datos públicos, ofrecer contexto para su interpretación y permitir comprobar cada resultado frente a su fuente.
+Proxecto aberto para facilitar a consulta, a análise e a reutilización dos contratos menores publicados polo Concello de Vigo. Combina un proceso reproducible de preparación de datos cunha web estática pensada para achegar información pública a persoas investigadoras, xornalistas, entidades e cidadanía.
 
 > [!IMPORTANT]
 > As análises e sinais deste proxecto **non determinan a legalidade** dunha adxudicación nin proban irregularidades. Serven para identificar información que pode merecer revisión, sempre coa documentación oficial e o contexto administrativo completo.
->
-> Los análisis y señales del proyecto **no determinan la legalidad** de una adjudicación ni prueban irregularidades. Identifican información que puede requerir revisión, siempre junto con la documentación oficial y el contexto administrativo completo.
 
-## Contexto e alcance / Contexto y alcance
+### Contexto e alcance
 
 Os contratos menores son unha modalidade de contratación pública regulada no artigo 118 da Lei 9/2017, de contratos do sector público (LCSP). A norma establece, como referencia, un valor estimado inferior a 40.000 € para obras e a 15.000 € para subministracións ou servizos, sen IVE, e esixe xustificar que non se altera o obxecto do contrato para evitar estes límites.
 
-Los contratos menores son una modalidad de contratación pública regulada por el artículo 118 de la Ley 9/2017, de Contratos del Sector Público (LCSP). La norma fija, como referencia, un valor estimado inferior a 40.000 € para obras y a 15.000 € para suministros o servicios, sin IVA, y exige justificar que no se altera el objeto del contrato para evitar esos límites.
-
 Os datos proceden dos ficheiros JSON anuais de contratos menores publicados polo [portal de datos abertos do Concello de Vigo](https://datos.vigo.org/). A unidade de análise é cada fila publicada pola fonte; non ten por que corresponder cun expediente único. A cobertura comeza en 2019 e depende dos conxuntos de datos dispoñibles no portal municipal.
 
-Los datos proceden de los ficheros JSON anuales de contratos menores publicados por el [portal de datos abiertos del Concello de Vigo](https://datos.vigo.org/). La unidad de análisis es cada fila publicada por la fuente; no tiene por qué corresponder con un expediente único. La cobertura comienza en 2019 y depende de los conjuntos de datos disponibles en el portal municipal.
-
-## Que ofrece / Qué ofrece
+### Que ofrece o proxecto
 
 - Exploración de adxudicacións, unidades tramitadoras e adxudicatarios.
 - Series temporais, importes, indicadores de competencia e clasificación temática.
@@ -29,29 +23,17 @@ Los datos proceden de los ficheros JSON anuales de contratos menores publicados 
 - Fichas e agregados xerados a partir dos datos publicados, cunha metodoloxía e limitacións explícitas.
 - Conservación dos valores orixinais e informes de incidencias para facer o tratamento máis auditable.
 
-- Exploración de adjudicaciones, unidades tramitadoras y adjudicatarios.
-- Series temporales, importes, indicadores de competencia y clasificación temática.
-- Señales configurables para priorizar casos de revisión, como importes próximos a los umbrales legales.
-- Fichas y agregados generados a partir de los datos publicados, con metodología y limitaciones explícitas.
-- Conservación de los valores originales e informes de incidencias para hacer el tratamiento más auditable.
-
-## Metodoloxía e límites / Metodología y límites
+### Metodoloxía e límites
 
 O *pipeline* descarga e conserva os datos de orixe, normaliza campos para facilitar a comparación e xera ficheiros JSON derivados para a web. Os alias seguros aplícanse de forma determinista; as coincidencias difusas ambiguas non se fusionan automaticamente e quedan para revisión. As comparacións anuais utilizan o ano do conxunto de datos e as series mensuais só usan datas de adxudicación válidas.
 
-El *pipeline* descarga y conserva los datos de origen, normaliza campos para facilitar la comparación y genera ficheros JSON derivados para la web. Los alias seguros se aplican de forma determinista; las coincidencias difusas ambiguas no se fusionan automáticamente y quedan para revisión. Las comparativas anuales usan el año del conjunto de datos y las series mensuales solo usan fechas de adjudicación válidas.
-
 A fonte municipal publica un campo de importe, pero o conxunto de datos por si só non permite confirmar que equivalga exactamente ao valor estimado sen IVE definido pola LCSP. Por iso, os limiares legais úsanse unicamente como referencia analítica. A análise tampouco inclúe o expediente completo, ofertas, motivación administrativa nin todo o contexto do mercado.
 
-La fuente municipal publica un campo de importe, pero el conjunto de datos por sí solo no permite confirmar que equivalga exactamente al valor estimado sin IVA definido por la LCSP. Por ello, los umbrales legales se usan únicamente como referencia analítica. El análisis tampoco incluye el expediente completo, ofertas, motivación administrativa ni todo el contexto del mercado.
+Antes de sacar conclusións, consulta a publicación municipal e a documentación oficial correspondente. O último exercicio pode estar incompleto e as clasificacións temáticas ou normalizacións poden conter erros.
 
-Antes de sacar ou extraer conclusións, consulta a publicación municipal e a documentación oficial correspondente. O último exercicio pode estar incompleto e as clasificacións temáticas ou normalizacións poden conter erros.
+### Arquitectura
 
-Antes de extraer conclusiones, consulta la publicación municipal y la documentación oficial correspondiente. El último ejercicio puede estar incompleto y las clasificaciones temáticas o normalizaciones pueden contener errores.
-
-## Arquitectura / Arquitectura
-
-| Compoñente / Componente | Descrición / Descripción |
+| Compoñente | Descrición |
 |---|---|
 | `pipeline/` | ETL en Python: descarga, normalización, análise e exportación de datos. |
 | `pipeline/config/` | Alias, regras temáticas e limiares versionados e configurables. |
@@ -62,53 +44,40 @@ Antes de extraer conclusiones, consulta la publicación municipal y la documenta
 
 GitHub Pages serve o resultado como sitio estático: non hai base de datos nin un *backend* que procese consultas de persoas usuarias.
 
-## Uso local / Uso local
+### Uso local
 
-### Requisitos
-
-- Python 3.11 ou superior / Python 3.11 o superior.
-- Node.js 22 ou superior e npm / Node.js 22 o superior y npm.
-
-### Instalación
+Requírese Python 3.11 ou superior e Node.js 22 ou superior con npm.
 
 ```bash
 python -m pip install -e pipeline[dev]
 npm install --prefix site
 ```
 
-### Datos de proba / Datos de prueba
-
 Xera datos derivados a partir de *fixtures* locais, sen descargar o portal municipal:
-
-Genera datos derivados a partir de *fixtures* locales, sin descargar el portal municipal:
 
 ```bash
 npm run data:fixtures
 ```
 
-### Actualización de datos / Actualización de datos
-
-Procesa todos os anos dispoñibles / Procesa todos los años disponibles:
+Para procesar todos os anos dispoñibles:
 
 ```bash
 npm run data:refresh
 ```
 
-Para anos concretos / Para años concretos:
+Para anos concretos:
 
 ```bash
 node scripts/run-python.mjs -m contratos_vigo refresh --year 2024 --year 2025
 ```
 
-### Desenvolvemento / Desarrollo
+Inicia o sitio en desenvolvemento:
 
 ```bash
 npm run dev
 ```
 
-O servidor de desenvolvemento adoita estar dispoñible en `http://localhost:4321` ou no porto que indique Astro.
-
-### Validación / Validación
+O servidor adoita estar dispoñible en `http://localhost:4321` ou no porto que indique Astro. Antes de propoñer cambios, executa:
 
 ```bash
 npm run build
@@ -118,19 +87,102 @@ npm run lint
 npm run test:e2e
 ```
 
-## Contribuír / Contribuir
+### Contribuír e licenza
 
-As contribucións son benvidas. Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para preparar o contorno, coñecer as convencións e executar as validacións antes de abrir unha proposta de cambio.
-
-Las contribuciones son bienvenidas. Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para preparar el entorno, conocer las convenciones y ejecutar las validaciones antes de abrir una propuesta de cambio.
-
-Ao informar dun problema nos datos, inclúe a ligazón á fonte municipal, o ano, o identificador ou rexistro afectado e unha descrición verificable. Non publiques datos persoais innecesarios.
-
-Al informar de un problema en los datos, incluye el enlace a la fuente municipal, el año, el identificador o registro afectado y una descripción verificable. No publiques datos personales innecesarios.
-
-## Licenza / Licencia
+As contribucións son benvidas. Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para preparar o contorno, coñecer as convencións e executar as validacións antes de abrir unha proposta de cambio. Ao informar dun problema nos datos, inclúe a ligazón á fonte municipal, o ano, o identificador ou rexistro afectado e unha descrición verificable. Non publiques datos persoais innecesarios.
 
 O código publícase baixo a [licenza MIT](LICENSE). Os datos de orixe pertencen á súa fonte e deben reutilizarse de acordo coas condicións do portal de datos abertos do Concello de Vigo.
+
+---
+
+## Español
+
+Proyecto abierto para facilitar la consulta, el análisis y la reutilización de los contratos menores publicados por el Concello de Vigo. Combina un proceso reproducible de preparación de datos con una web estática pensada para acercar información pública a personas investigadoras, periodistas, entidades y ciudadanía.
+
+> [!IMPORTANT]
+> Los análisis y señales de este proyecto **no determinan la legalidad** de una adjudicación ni prueban irregularidades. Sirven para identificar información que puede requerir revisión, siempre junto con la documentación oficial y el contexto administrativo completo.
+
+### Contexto y alcance
+
+Los contratos menores son una modalidad de contratación pública regulada por el artículo 118 de la Ley 9/2017, de Contratos del Sector Público (LCSP). La norma fija, como referencia, un valor estimado inferior a 40.000 € para obras y a 15.000 € para suministros o servicios, sin IVA, y exige justificar que no se altera el objeto del contrato para evitar esos límites.
+
+Los datos proceden de los ficheros JSON anuales de contratos menores publicados por el [portal de datos abiertos del Concello de Vigo](https://datos.vigo.org/). La unidad de análisis es cada fila publicada por la fuente; no tiene por qué corresponder con un expediente único. La cobertura comienza en 2019 y depende de los conjuntos de datos disponibles en el portal municipal.
+
+### Qué ofrece el proyecto
+
+- Exploración de adjudicaciones, unidades tramitadoras y adjudicatarios.
+- Series temporales, importes, indicadores de competencia y clasificación temática.
+- Señales configurables para priorizar casos de revisión, como importes próximos a los umbrales legales.
+- Fichas y agregados generados a partir de los datos publicados, con metodología y limitaciones explícitas.
+- Conservación de los valores originales e informes de incidencias para hacer el tratamiento más auditable.
+
+### Metodología y límites
+
+El *pipeline* descarga y conserva los datos de origen, normaliza campos para facilitar la comparación y genera ficheros JSON derivados para la web. Los alias seguros se aplican de forma determinista; las coincidencias difusas ambiguas no se fusionan automáticamente y quedan para revisión. Las comparativas anuales usan el año del conjunto de datos y las series mensuales solo usan fechas de adjudicación válidas.
+
+La fuente municipal publica un campo de importe, pero el conjunto de datos por sí solo no permite confirmar que equivalga exactamente al valor estimado sin IVA definido por la LCSP. Por ello, los umbrales legales se usan únicamente como referencia analítica. El análisis tampoco incluye el expediente completo, ofertas, motivación administrativa ni todo el contexto del mercado.
+
+Antes de extraer conclusiones, consulta la publicación municipal y la documentación oficial correspondiente. El último ejercicio puede estar incompleto y las clasificaciones temáticas o normalizaciones pueden contener errores.
+
+### Arquitectura
+
+| Componente | Descripción |
+|---|---|
+| `pipeline/` | ETL en Python: descarga, normalización, análisis y exportación de datos. |
+| `pipeline/config/` | Alias, reglas temáticas y umbrales versionados y configurables. |
+| `pipeline/tests/` | *Fixtures* y pruebas del pipeline con `pytest`. |
+| `site/` | Web estática construida con Astro y React. |
+| `site/public/data/derived/` | Artefactos JSON derivados que consume la web. |
+| `.github/workflows/` | Integración continua, actualización periódica y despliegue en GitHub Pages. |
+
+GitHub Pages sirve el resultado como sitio estático: no hay base de datos ni un *backend* que procese consultas de personas usuarias.
+
+### Uso local
+
+Se requiere Python 3.11 o superior y Node.js 22 o superior con npm.
+
+```bash
+python -m pip install -e pipeline[dev]
+npm install --prefix site
+```
+
+Genera datos derivados a partir de *fixtures* locales, sin descargar el portal municipal:
+
+```bash
+npm run data:fixtures
+```
+
+Para procesar todos los años disponibles:
+
+```bash
+npm run data:refresh
+```
+
+Para años concretos:
+
+```bash
+node scripts/run-python.mjs -m contratos_vigo refresh --year 2024 --year 2025
+```
+
+Inicia el sitio en desarrollo:
+
+```bash
+npm run dev
+```
+
+El servidor suele estar disponible en `http://localhost:4321` o en el puerto que indique Astro. Antes de proponer cambios, ejecuta:
+
+```bash
+npm run build
+python -m pytest pipeline/tests -q
+npm run test:web
+npm run lint
+npm run test:e2e
+```
+
+### Contribuir y licencia
+
+Las contribuciones son bienvenidas. Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para preparar el entorno, conocer las convenciones y ejecutar las validaciones antes de abrir una propuesta de cambio. Al informar de un problema en los datos, incluye el enlace a la fuente municipal, el año, el identificador o registro afectado y una descripción verificable. No publiques datos personales innecesarios.
 
 El código se publica bajo la [licencia MIT](LICENSE). Los datos de origen pertenecen a su fuente y deben reutilizarse conforme a las condiciones del portal de datos abiertos del Concello de Vigo.
 
@@ -165,26 +217,64 @@ The municipal source supplies an amount field, but the dataset alone cannot esta
 
 Consult the municipal publication and the relevant official records before drawing conclusions. The latest year may be incomplete, and topic classification or normalisation may contain errors.
 
-### Architecture, local use, and contributing
+### Architecture
 
-The repository contains:
+| Component | Description |
+|---|---|
+| `pipeline/` | Python ETL for downloading, normalising, analysing, and exporting data. |
+| `pipeline/config/` | Versioned, configurable aliases, topic rules, and thresholds. |
+| `pipeline/tests/` | Pipeline fixtures and tests using `pytest`. |
+| `site/` | Static site built with Astro and React. |
+| `site/public/data/derived/` | Generated JSON artefacts consumed by the site. |
+| `.github/workflows/` | Continuous integration, scheduled refreshes, and GitHub Pages deployment. |
 
-- `pipeline/`: Python ETL for downloading, normalising, analysing, and exporting data.
-- `pipeline/config/`: versioned, configurable aliases, topic rules, and thresholds.
-- `site/`: an Astro and React static site consuming generated JSON files.
-- `.github/workflows/`: continuous integration, scheduled refreshes, and GitHub Pages deployment.
+GitHub Pages serves the result as a static site: there is no database or backend processing user queries.
 
-Requirements are Python 3.11+ and Node.js 22+ with npm. Install dependencies, generate local fixture data, and run the development site with:
+### Local use
+
+Python 3.11+ and Node.js 22+ with npm are required.
 
 ```bash
 python -m pip install -e pipeline[dev]
 npm install --prefix site
+```
+
+Generate derived data from local fixtures without downloading the municipal portal:
+
+```bash
 npm run data:fixtures
+```
+
+To process all available years:
+
+```bash
+npm run data:refresh
+```
+
+For specific years:
+
+```bash
+node scripts/run-python.mjs -m contratos_vigo refresh --year 2024 --year 2025
+```
+
+Start the development site:
+
+```bash
 npm run dev
 ```
 
-Use `npm run data:refresh` to process all available years, or pass repeated `--year` arguments through `node scripts/run-python.mjs -m contratos_vigo refresh`. Run `python -m pytest pipeline/tests -q`, `npm run test:web`, `npm run lint`, and `npm run test:e2e` before proposing changes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
+The server is usually available at `http://localhost:4321`, or at the port reported by Astro. Before proposing changes, run:
 
-### Licence
+```bash
+npm run build
+python -m pytest pipeline/tests -q
+npm run test:web
+npm run lint
+npm run test:e2e
+```
+
+### Contributing and licence
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to prepare the environment, learn the conventions, and run validation before opening a change proposal. When reporting a data issue, include the municipal-source link, year, relevant identifier or record, and a verifiable description. Do not publish unnecessary personal data.
 
 The code is available under the [MIT License](LICENSE). Source data belongs to its publisher and must be reused under the terms of the Concello de Vigo open-data portal.

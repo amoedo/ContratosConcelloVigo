@@ -701,6 +701,46 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if emitted:
                 break
 
+    threshold_split_groups: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        if record["award_date"]:
+            threshold_split_groups[
+                (record["vendor_id"], record["primary_topic_id"], record["type_normalized"])
+            ].append(record)
+
+    for (vendor_id, topic_id, contract_type), rows in threshold_split_groups.items():
+        ordered = sorted(rows, key=lambda row: row["award_date"])
+        for start, first in enumerate(ordered):
+            if not first["near_threshold"]:
+                continue
+            first_date = parse_date(first["award_date"])
+            if first_date is None:
+                continue
+            total_amount = first["importe_eur"]
+            for end in range(start + 1, len(ordered)):
+                subsequent = ordered[end]
+                subsequent_date = parse_date(subsequent["award_date"])
+                if subsequent_date is None:
+                    continue
+                window_days = (subsequent_date - first_date).days
+                if window_days > 30:
+                    break
+                total_amount += subsequent["importe_eur"]
+                if total_amount > first["legal_threshold_eur"]:
+                    register_alert(
+                        {
+                            "alert_id": f"threshold-split-{vendor_id}-{topic_id}-{contract_type}-{start}",
+                            "kind": "threshold-splitting",
+                            "severity": "alta",
+                            "title": f"Posible fraccionamiento para {first['vendor_name']}",
+                            "summary": f"Una adjudicación cercana al umbral y contratos posteriores de temática similar para {first['vendor_name']} superan el umbral de {round(first['legal_threshold_eur'], 2)} euros en {window_days} días.",
+                            "evidence": {"vendor_id": vendor_id, "topic_id": topic_id, "type": contract_type, "threshold_eur": first["legal_threshold_eur"], "window_days": window_days, "total_amount": round(total_amount, 2)},
+                            "filters": {"year": str(first["source_year"]), "vendor": vendor_id, "topic": topic_id},
+                            "related_record_ids": [item["record_id"] for item in ordered[start:end + 1]],
+                        }
+                    )
+                    break
+
     repeated_amount_groups: dict[tuple[int, str, str, int], list[dict[str, Any]]] = defaultdict(list)
     for record in records:
         rounded_amount = int(round(record["importe_eur"] / 50.0) * 50)
@@ -728,11 +768,13 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "vendor-growth": {"growth_multiple": 2.5, "minimum_current_eur": 5000},
         "topic-growth": {"growth_multiple": 2.4, "minimum_current_eur": 5000},
         "fragmentation-pattern": {"minimum_records": 3, "window_days": 60},
+        "threshold-splitting": {"window_days": 30, "requires_near_threshold_first_award": True},
         "repeated-amounts": {"minimum_records": 3, "rounding_eur": 50},
     }
     priority_by_severity = {"alta": 3, "media": 2, "baixa": 1}
     confidence_by_kind = {
         "fragmentation-pattern": 0.78,
+        "threshold-splitting": 0.88,
         "unit-concentration": 0.9,
         "low-competition": 0.86,
         "near-threshold-group": 0.92,

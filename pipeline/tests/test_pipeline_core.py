@@ -66,7 +66,7 @@ def alert_record(index: int, *, year: int = 2025, vendor: str = 'vendor-a', amou
         'record_id': f'{year}-{vendor}-{index}', 'source_year': year, 'award_date': f'{year}-01-{index + 1:02d}',
         'unit_id': 'unit-a', 'unit_name': 'Unidade A', 'vendor_id': vendor, 'vendor_name': vendor,
         'importe_eur': amount, 'licitadores_raw': 1, 'near_threshold': False,
-        'primary_topic_id': 'topic-a', 'primary_topic_label': 'Tema A', 'legal_threshold_eur': 15000,
+        'primary_topic_id': 'topic-a', 'primary_topic_label': 'Tema A', 'type_normalized': 'servicio', 'legal_threshold_eur': 15000,
         'alert_flags': [],
     }
 
@@ -96,6 +96,26 @@ def test_legal_thresholds_distinguish_works_from_services_and_supplies() -> None
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'obra'}, settings) == 40000
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'servicio'}, settings) == 15000
     assert threshold_for_record({'source_year': 2026, 'type_normalized': 'suministro'}, settings) == 15000
+
+
+def test_threshold_splitting_requires_a_near_threshold_award_and_30_day_window() -> None:
+    first = alert_record(0, vendor='vendor-a', amount=14000)
+    first['near_threshold'] = True
+    later = alert_record(1, vendor='vendor-a', amount=1500)
+    later['award_date'] = '2025-01-31'
+    alerts = build_alerts([first, later])
+
+    splitting = next(alert for alert in alerts if alert['kind'] == 'threshold-splitting')
+    assert splitting['related_record_ids'] == [first['record_id'], later['record_id']]
+    assert splitting['evidence']['total_amount'] == 15500
+    assert splitting['evidence']['window_days'] == 30
+
+    later['award_date'] = '2025-02-01'
+    assert not any(alert['kind'] == 'threshold-splitting' for alert in build_alerts([first, later]))
+
+    later['award_date'] = '2025-01-31'
+    later['primary_topic_id'] = 'topic-b'
+    assert not any(alert['kind'] == 'threshold-splitting' for alert in build_alerts([first, later]))
 
 
 def test_download_year_retries_on_transient_error(tmp_path: Path) -> None:

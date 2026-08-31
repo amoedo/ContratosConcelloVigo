@@ -12,3 +12,5 @@ src/contratos_vigo_pipeline.egg-info/entry_points.txt
 src/contratos_vigo_pipeline.egg-info/requires.txt
 src/contratos_vigo_pipeline.egg-info/top_level.txt
 tests/test_pipeline_core.py
+tests/test_pipeline_helpers.py
+tests/test_text.py

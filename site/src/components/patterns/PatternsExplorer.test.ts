@@ -16,8 +16,8 @@ describe('pattern presentation', () => {
     expect(grouped[0].occurrences).toBe(2);
   });
 
-  it('publishes seven descriptive names in both languages', () => {
-    expect(RULES).toHaveLength(7);
+  it('publishes eight descriptive names in both languages', () => {
+    expect(RULES).toHaveLength(8);
     RULES.forEach((rule) => {
       expect(ruleName(rule.id, 'es')).not.toBe(rule.id);
       expect(ruleName(rule.id, 'gl')).not.toBe(rule.id);

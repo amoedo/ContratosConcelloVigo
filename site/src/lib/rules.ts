@@ -68,6 +68,15 @@ export const RULES: RuleDefinition[] = [
     limitations: { es: 'La similitud temática no demuestra unidad funcional ni fraccionamiento contractual.', gl: 'A similitude temática non demostra unidade funcional nin fraccionamento contractual.' },
   },
   {
+    id: 'threshold-splitting', version: '2.0',
+    name: { es: 'Posible fraccionamiento junto al umbral', gl: 'Posible fraccionamento xunto ao limiar' },
+    objective: { es: 'Identificar contratos del mismo adjudicatario y temática que superan el umbral tras una primera adjudicación cercana al límite.', gl: 'Identificar contratos do mesmo adxudicatario e temática que superan o limiar tras unha primeira adxudicación próxima ao límite.' },
+    calculation: { es: 'Parte de una adjudicación entre el 85% y el 100% del umbral y suma las posteriores del mismo tipo, adjudicatario y tema durante 30 días.', gl: 'Parte dunha adxudicación entre o 85% e o 100% do limiar e suma as posteriores do mesmo tipo, adxudicatario e tema durante 30 días.' },
+    thresholds: { es: '15.000 € para servicios/suministros y 40.000 € para obras, según la configuración aplicable.', gl: '15.000 € para servizos/subministracións e 40.000 € para obras, segundo a configuración aplicable.' },
+    evidence: { es: 'Adjudicatario, tema, tipo, fechas, importe agregado y umbral aplicado.', gl: 'Adxudicatario, tema, tipo, datas, importe agregado e limiar aplicado.' },
+    limitations: { es: 'La similitud temática y la proximidad temporal no prueban por sí solas que exista fraccionamiento.', gl: 'A similitude temática e a proximidade temporal non proban por si soas que exista fraccionamento.' },
+  },
+  {
     id: 'repeated-amounts', version: '2.0',
     name: { es: 'Repetición de importes similares', gl: 'Repetición de importes semellantes' },
     objective: { es: 'Destacar importes recurrentes entre la misma unidad y adjudicatario.', gl: 'Destacar importes recorrentes entre a mesma unidade e adxudicatario.' },

@@ -32,12 +32,12 @@ test('language switch preserves a usable Galician interface', async ({ page }) =
   await expect(page.getByText('Ámbito da análise')).toBeVisible();
 });
 
-test('methodology documents law, architecture and seven rules in Galician', async ({ page }) => {
+test('methodology documents law, architecture and eight rules in Galician', async ({ page }) => {
   await page.goto('/metodologia?lang=gl');
   await expect(page.getByRole('heading', { level: 1, name: /Como se constrúe a web/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Arquitectura' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Lei 9\/2017 consolidada/ })).toHaveAttribute('href', /boe\.es/);
-  await expect(page.locator('.method-rule')).toHaveCount(7);
+  await expect(page.locator('.method-rule')).toHaveCount(8);
 });
 
 test('patterns use descriptive names and unambiguous counters', async ({ page }) => {

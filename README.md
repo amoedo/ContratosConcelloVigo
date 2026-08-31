@@ -45,7 +45,7 @@ A fonte municipal publica un campo de importe, pero o conxunto de datos por si s
 
 La fuente municipal publica un campo de importe, pero el conjunto de datos por sí solo no permite confirmar que equivalga exactamente al valor estimado sin IVA definido por la LCSP. Por ello, los umbrales legales se usan únicamente como referencia analítica. El análisis tampoco incluye el expediente completo, ofertas, motivación administrativa ni todo el contexto del mercado.
 
-Antes de tirar ou extraer conclusións, consulta a publicación municipal e a documentación oficial correspondente. O último exercicio pode estar incompleto e as clasificacións temáticas ou normalizacións poden conter erros.
+Antes de sacar ou extraer conclusións, consulta a publicación municipal e a documentación oficial correspondente. O último exercicio pode estar incompleto e as clasificacións temáticas ou normalizacións poden conter erros.
 
 Antes de extraer conclusiones, consulta la publicación municipal y la documentación oficial correspondiente. El último ejercicio puede estar incompleto y las clasificaciones temáticas o normalizaciones pueden contener errores.
 
@@ -100,18 +100,23 @@ Para anos concretos / Para años concretos:
 node scripts/run-python.mjs -m contratos_vigo refresh --year 2024 --year 2025
 ```
 
-### Desenvolvemento e validación / Desarrollo y validación
+### Desenvolvemento / Desarrollo
 
 ```bash
 npm run dev
+```
+
+O servidor de desenvolvemento adoita estar dispoñible en `http://localhost:4321`.
+
+### Validación / Validación
+
+```bash
 npm run build
 python -m pytest pipeline/tests -q
 npm run test:web
 npm run lint
 npm run test:e2e
 ```
-
-O servidor de desenvolvemento adoita estar dispoñible en `http://localhost:4321`.
 
 ## Contribuír / Contribuir
 

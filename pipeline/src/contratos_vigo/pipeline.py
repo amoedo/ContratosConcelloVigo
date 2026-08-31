@@ -721,7 +721,7 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 subsequent = ordered[end]
                 subsequent_date = parse_date(subsequent["award_date"])
                 if subsequent_date is None:
-                    continue
+                    break
                 window_days = (subsequent_date - first_date).days
                 if window_days > 30:
                     break
@@ -729,7 +729,7 @@ def build_alerts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if total_amount > first["legal_threshold_eur"]:
                     register_alert(
                         {
-                            "alert_id": f"threshold-split-{vendor_id}-{topic_id}-{contract_type}-{start}",
+                            "alert_id": f"threshold-split-{first['record_id']}",
                             "kind": "threshold-splitting",
                             "severity": "alta",
                             "title": f"Posible fraccionamiento para {first['vendor_name']}",

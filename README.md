@@ -106,7 +106,7 @@ node scripts/run-python.mjs -m contratos_vigo refresh --year 2024 --year 2025
 npm run dev
 ```
 
-O servidor de desenvolvemento adoita estar dispoñible en `http://localhost:4321`.
+O servidor de desenvolvemento adoita estar dispoñible en `http://localhost:4321` ou no porto que indique Astro.
 
 ### Validación / Validación
 
